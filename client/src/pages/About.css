@@ -1,0 +1,278 @@
+/* About Page Styles */
+
+.about-page {
+  min-height: 100vh;
+  padding-top: 1rem;
+}
+
+/* Hero */
+.about-hero {
+  padding: var(--spacing-2xl) 0;
+  text-align: center;
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
+}
+
+.about-hero-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  margin: var(--spacing-md) 0;
+}
+
+.about-hero p {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* Mission Section */
+.about-mission {
+  background: var(--bg-darker);
+}
+
+.mission-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: center;
+}
+
+.mission-text h2 {
+  margin: var(--spacing-md) 0;
+  font-size: 2rem;
+}
+
+.mission-text p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--spacing-md);
+}
+
+.mission-visual {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.mission-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.mission-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-glow);
+}
+
+.mission-emoji {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.mission-card h3 {
+  font-size: 1.75rem;
+  color: var(--primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.mission-card p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Values Section */
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.value-card {
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.value-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--spacing-lg);
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  color: var(--primary);
+}
+
+.value-card h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.value-card p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Team Section */
+.about-team {
+  background: var(--bg-darker);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.team-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-glow);
+}
+
+.team-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-md);
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.team-card h4 {
+  font-size: 1rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.team-card p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* CTA Section */
+.about-cta {
+  padding: var(--spacing-2xl) 0;
+}
+
+.about-cta .cta-card {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+}
+
+.cta-icon {
+  font-size: 3rem;
+  color: var(--primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.about-cta h2 {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.about-cta p {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-xl);
+}
+
+.cta-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+}
+
+/* Pilot Photos Section */
+.about-pilot {
+  background: var(--bg-darker);
+}
+
+.pilot-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.pilot-photo {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-normal);
+}
+
+.pilot-photo:hover {
+  transform: scale(1.03);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.pilot-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .mission-content {
+    grid-template-columns: 1fr;
+  }
+
+  .values-grid,
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pilot-gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .about-hero h1 {
+    font-size: 2rem;
+  }
+
+  .values-grid,
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-visual {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+  }
+
+  .pilot-gallery {
+    grid-template-columns: 1fr;
+  }
+}

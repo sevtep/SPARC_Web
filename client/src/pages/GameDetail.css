@@ -1,0 +1,219 @@
+/* Game Detail Page Styles */
+
+.game-detail-page {
+  padding: 3rem 0 4rem;
+  min-height: calc(100vh - 80px);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-xl);
+  transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+/* Header */
+.game-detail-header {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-xl);
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+}
+
+.game-badges {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.game-detail-info h1 {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.game-description {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-xl);
+}
+
+.game-stats {
+  display: flex;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.game-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+}
+
+.game-stats .stat svg {
+  color: var(--primary);
+}
+
+.play-button {
+  font-size: 1rem;
+}
+
+/* Visual */
+.game-detail-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-thumbnail {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-emoji {
+  font-size: 8rem;
+}
+
+/* Content Sections */
+.game-detail-content {
+  display: grid;
+  gap: var(--spacing-xl);
+}
+
+.content-section {
+  background: var(--gradient-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+}
+
+.content-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Objectives */
+.objectives-list {
+  list-style: none;
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.objectives-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.objective-icon {
+  width: 24px;
+  height: 24px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-green);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Grade Levels */
+.grade-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.grade-tag {
+  padding: 0.5rem 1rem;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  color: var(--primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Prerequisites */
+.prerequisites {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.prereq-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.prereq-card:hover {
+  border-color: var(--primary);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.prereq-name {
+  font-weight: 500;
+}
+
+.prereq-arrow {
+  transform: rotate(180deg);
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .game-detail-header {
+    grid-template-columns: 1fr;
+  }
+
+  .game-detail-visual {
+    order: -1;
+  }
+
+  .game-thumbnail {
+    width: 200px;
+    height: 200px;
+  }
+
+  .game-emoji {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-detail-info h1 {
+    font-size: 1.75rem;
+  }
+
+  .game-stats {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}

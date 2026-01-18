@@ -1,0 +1,300 @@
+/* Game History Page Styles */
+.game-history-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Header */
+.history-header {
+  margin-bottom: 2rem;
+}
+
+.history-header h1 {
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.history-header p {
+  color: var(--text-secondary);
+}
+
+/* Stats */
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.stat-item .stat-icon {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+.stat-item .stat-icon.gold {
+  color: #FFD700;
+}
+
+.stat-item .stat-icon.purple {
+  color: var(--secondary);
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Filters */
+.history-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+
+.filter-select {
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Sessions List */
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.session-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+}
+
+.session-card:hover {
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.session-icon {
+  font-size: 2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.session-info {
+  flex: 1;
+}
+
+.session-info h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.session-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.session-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.session-score {
+  text-align: center;
+  min-width: 80px;
+}
+
+.score-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #FFD700;
+}
+
+.score-label {
+  font-size: 0.675rem;
+  color: var(--text-muted);
+}
+
+.session-status {
+  min-width: 100px;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.675rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.status-badge.completed {
+  background: rgba(50, 205, 50, 0.2);
+  color: var(--success);
+}
+
+.status-badge.in-progress {
+  background: rgba(255, 165, 0, 0.2);
+  color: #FFA500;
+}
+
+.session-status .progress-bar {
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.session-status .progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  color: var(--text-muted);
+  gap: 1rem;
+}
+
+.empty-state h3 {
+  color: var(--text-primary);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.page-info {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .history-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .history-filters {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .session-card {
+    flex-wrap: wrap;
+  }
+
+  .session-info {
+    width: 100%;
+    order: 1;
+  }
+
+  .session-icon {
+    order: 0;
+  }
+
+  .session-score,
+  .session-status {
+    order: 2;
+  }
+}

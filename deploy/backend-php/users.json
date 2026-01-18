@@ -1,0 +1,10 @@
+[
+    {
+        "id": "demo-user",
+        "email": "demo@sparc.edu",
+        "username": "Demo User",
+        "password": "$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/Taa",
+        "role": "student",
+        "createdAt": "2024-01-01 00:00:00"
+    }
+]
