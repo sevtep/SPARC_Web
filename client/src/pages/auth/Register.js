@@ -125,6 +125,7 @@ const Register = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
+                  data-agent-id="input_username"
                 />
               </div>
             </div>
@@ -142,6 +143,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  data-agent-id="input_email"
                 />
               </div>
             </div>
@@ -167,6 +169,7 @@ const Register = () => {
               type="button" 
               className="btn btn-primary"
               onClick={handleNextStep}
+              data-agent-id="btn_continue"
             >
               Continue
             </button>
@@ -188,6 +191,7 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  data-agent-id="input_password"
                 />
                 <button
                   type="button"
@@ -223,6 +227,7 @@ const Register = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
+                  data-agent-id="input_confirm_password"
                 />
                 <button
                   type="button"
@@ -255,6 +260,7 @@ const Register = () => {
                   placeholder="Enter your school name"
                   value={formData.school}
                   onChange={handleChange}
+                  data-agent-id="input_school"
                 />
               </div>
             </div>
@@ -271,6 +277,7 @@ const Register = () => {
                   placeholder="Enter your course name"
                   value={formData.course}
                   onChange={handleChange}
+                  data-agent-id="input_course"
                 />
               </div>
             </div>
@@ -280,6 +287,7 @@ const Register = () => {
                 type="button" 
                 className="btn btn-secondary"
                 onClick={() => setStep(1)}
+                data-agent-id="btn_back"
               >
                 Back
               </button>
@@ -287,6 +295,7 @@ const Register = () => {
                 type="submit" 
                 className="btn btn-primary"
                 disabled={loading}
+                data-agent-id="btn_create_account"
               >
                 {loading ? 'Creating Account...' : 'Create Account'}
               </button>
@@ -297,7 +306,7 @@ const Register = () => {
 
       <div className="auth-switch">
         Already have an account?
-        <Link to="/login">Sign In</Link>
+        <Link to="/login" data-agent-id="link_signin">Sign In</Link>
       </div>
 
       <style jsx="true">{`

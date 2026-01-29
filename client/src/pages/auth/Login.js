@@ -70,6 +70,7 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              data-agent-id="login_email"
             />
           </div>
         </div>
@@ -87,6 +88,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
+              data-agent-id="login_password"
             />
             <button
               type="button"
@@ -102,6 +104,7 @@ const Login = () => {
           type="submit" 
           className="btn btn-primary"
           disabled={loading}
+          data-agent-id="btn_signin"
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
@@ -109,7 +112,7 @@ const Login = () => {
 
       <div className="auth-switch">
         Don't have an account?
-        <Link to="/register">Sign Up</Link>
+        <Link to="/register" data-agent-id="link_signup">Sign Up</Link>
       </div>
 
       <style jsx="true">{`

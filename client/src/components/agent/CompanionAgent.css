@@ -1,0 +1,348 @@
+/* Companion Agent Styles */
+
+.companion-agent {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 99999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Toggle Button */
+.agent-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.agent-toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.agent-toggle .agent-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agent-toggle .close-icon {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Agent Panel */
+.companion-agent.open .agent-toggle {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 36px;
+  height: 36px;
+  z-index: 10;
+}
+
+.companion-agent.open .agent-toggle .close-icon {
+  font-size: 16px;
+}
+
+.agent-panel {
+  width: 360px;
+  height: 480px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.agent-header {
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  object-fit: cover;
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.agent-model {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* Messages Area */
+.agent-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+.welcome-message {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-message p {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.welcome-message ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+  color: #666;
+}
+
+.welcome-message li {
+  margin: 4px 0;
+}
+
+/* Message Bubbles */
+.message {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message.user {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.message-content {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.message.user .message-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.assistant .message-content {
+  background: white;
+  color: #333;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.message.error .message-content {
+  background: #fff0f0;
+  color: #d32f2f;
+}
+
+/* Action Badges */
+.action-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.action-badge {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Loading Animation */
+.message.loading .message-content {
+  padding: 10px 20px;
+}
+
+.loading-dots span {
+  animation: blink 1.4s infinite both;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+
+/* Input Area */
+.agent-input-area {
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 8px;
+}
+
+.agent-input-area input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.agent-input-area input:focus {
+  border-color: #667eea;
+}
+
+.agent-input-area input:disabled {
+  background: #f5f5f5;
+}
+
+.send-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.send-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.agent-error {
+  padding: 8px 16px;
+  background: #fff0f0;
+  color: #d32f2f;
+  font-size: 12px;
+  border-top: 1px solid #ffcdd2;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .companion-agent {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .agent-panel {
+    width: calc(100vw - 20px);
+    height: 60vh;
+    max-width: 360px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .agent-panel {
+    background: #1e1e1e;
+  }
+
+  .agent-messages {
+    background: #2d2d2d;
+  }
+
+  .welcome-message {
+    background: #3d3d3d;
+  }
+
+  .welcome-message p {
+    color: #e0e0e0;
+  }
+
+  .welcome-message ul {
+    color: #aaa;
+  }
+
+  .message.assistant .message-content {
+    background: #3d3d3d;
+    color: #e0e0e0;
+  }
+
+  .agent-input-area {
+    background: #1e1e1e;
+    border-top-color: #3d3d3d;
+  }
+
+  .agent-input-area input {
+    background: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #e0e0e0;
+  }
+
+  .agent-input-area input:focus {
+    border-color: #667eea;
+  }
+}

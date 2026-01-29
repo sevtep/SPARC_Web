@@ -187,6 +187,7 @@ const Games = () => {
             <select 
               value={filter.category} 
               onChange={(e) => setFilter({ ...filter, category: e.target.value })}
+              data-agent-id="filter_category"
             >
               <option value="">All Categories</option>
               <option value="biology">Biology</option>
@@ -198,6 +199,7 @@ const Games = () => {
             <select 
               value={filter.difficulty} 
               onChange={(e) => setFilter({ ...filter, difficulty: e.target.value })}
+              data-agent-id="filter_difficulty"
             >
               <option value="">All Difficulties</option>
               <option value="easy">Easy</option>
@@ -322,7 +324,11 @@ const Games = () => {
                   </div>
 
                   <div className="game-actions">
-                    <Link to={`/games/${game.slug}`} className="btn-details">
+                    <Link 
+                      to={`/games/${game.slug}`} 
+                      className="btn-details"
+                      data-agent-id={`game_details_${game.slug}`}
+                    >
                       Details <FiChevronRight />
                     </Link>
                     <a 
@@ -330,6 +336,7 @@ const Games = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="btn-play"
+                      data-agent-id={`game_play_${game.slug}`}
                     >
                       <FiPlay /> Play
                     </a>
@@ -351,6 +358,7 @@ const Games = () => {
             <button 
               className="btn btn-secondary"
               onClick={() => setFilter({ category: '', difficulty: '' })}
+              data-agent-id="btn_clear_filters"
             >
               Clear Filters
             </button>

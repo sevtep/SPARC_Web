@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+
+// Companion Agent
+import CompanionAgent from './components/agent/CompanionAgent';
+import { setOpenCompetitionCallback } from './components/agent/runner';
+
+// Quiz Competition
+import QuizCompetition from './components/competition/QuizCompetition';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -60,11 +67,34 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
+  const [isCompetitionOpen, setIsCompetitionOpen] = useState(false);
+
+  // Set up the callback for the agent to open competition
+  useEffect(() => {
+    setOpenCompetitionCallback(() => {
+      setIsCompetitionOpen(true);
+    });
+    
+    return () => {
+      setOpenCompetitionCallback(null);
+    };
+  }, []);
+
+  const handleCloseCompetition = () => {
+    setIsCompetitionOpen(false);
+  };
+
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
+    <>
+      <CompanionAgent />
+      <QuizCompetition 
+        isOpen={isCompetitionOpen} 
+        onClose={handleCloseCompetition} 
+      />
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/games" element={<Games />} />
         <Route path="/games/:slug" element={<GameDetail />} />
@@ -127,9 +157,10 @@ function App() {
         <Route path="settings" element={<SystemSettings />} />
       </Route>
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

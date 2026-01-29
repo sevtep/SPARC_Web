@@ -36,11 +36,11 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/', label: 'Home', end: true },
-    { to: '/games', label: 'Games' },
-    { to: '/knowledge-map', label: 'Knowledge Map' },
-    { to: '/leaderboard', label: 'Rankings' },
-    { to: '/about', label: 'About' },
+    { to: '/', label: 'Home', end: true, agentId: 'nav_home' },
+    { to: '/games', label: 'Games', agentId: 'nav_games' },
+    { to: '/knowledge-map', label: 'Knowledge Map', agentId: 'nav_knowledge' },
+    { to: '/leaderboard', label: 'Rankings', agentId: 'nav_rankings' },
+    { to: '/about', label: 'About', agentId: 'nav_about' },
   ];
 
   return (
@@ -58,6 +58,7 @@ const Navbar = () => {
               key={link.to}
               to={link.to}
               end={link.end}
+              data-agent-id={link.agentId}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               {link.label}
@@ -107,8 +108,8 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="auth-buttons">
-              <Link to="/login" className="btn btn-ghost">Login</Link>
-              <Link to="/register" className="btn btn-primary">Get Started</Link>
+              <Link to="/login" className="btn btn-ghost" data-agent-id="btn_login">Login</Link>
+              <Link to="/register" className="btn btn-primary" data-agent-id="btn_register">Get Started</Link>
             </div>
           )}
 
@@ -136,6 +137,7 @@ const Navbar = () => {
                 key={link.to}
                 to={link.to}
                 end={link.end}
+                data-agent-id={`mobile_${link.agentId}`}
                 className={({ isActive }) => `mobile-nav-link ${isActive ? 'active' : ''}`}
               >
                 {link.label}

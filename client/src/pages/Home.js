@@ -427,6 +427,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={startExploring}
+                  data-agent-id="btn_begin_journey"
                 >
                   <span className="btn-text">Begin Your Journey</span>
                   <span className="btn-icon">→</span>
@@ -440,7 +441,7 @@ const Home = () => {
                   />
                 </motion.button>
 
-                <button className="btn-skip" onClick={skipIntro}>
+                <button className="btn-skip" onClick={skipIntro} data-agent-id="btn_skip_intro">
                   Skip Intro →
                 </button>
               </motion.div>

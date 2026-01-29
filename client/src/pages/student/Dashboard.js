@@ -89,7 +89,7 @@ const Dashboard = () => {
           <h1>{getGreeting()}, {user?.username}!</h1>
           <p>Ready to continue your journey through the human body?</p>
         </div>
-        <Link to="/student/games" className="btn btn-primary">
+        <Link to="/student/games" className="btn btn-primary" data-agent-id="btn_continue_learning">
           <FiPlay /> Continue Learning
         </Link>
       </motion.section>

@@ -1,0 +1,166 @@
+.app {
+  min-height: 100vh;
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+h2 {
+  font-size: 1.2rem;
+  color: #444;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+/* Controls Section */
+.controls-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 24px;
+}
+
+.controls-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-item label {
+  font-weight: 500;
+  min-width: 60px;
+  color: #555;
+}
+
+.control-item input,
+.control-item select {
+  flex: 1;
+  max-width: 300px;
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.control-item input:focus,
+.control-item select:focus {
+  outline: none;
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.2);
+}
+
+.control-item.buttons {
+  margin-top: 8px;
+  gap: 12px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4a90d9, #357abd);
+  color: white;
+  box-shadow: 0 2px 8px rgba(74, 144, 217, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.5);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: white;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.4);
+}
+
+.btn-secondary:hover {
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.5);
+}
+
+/* Log Section */
+.log-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.log-container {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9rem;
+}
+
+.log-empty {
+  color: #888;
+  font-style: italic;
+}
+
+.log-entry {
+  padding: 4px 0;
+  border-bottom: 1px solid #333;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: #888;
+  margin-right: 8px;
+}
+
+.log-info .log-message {
+  color: #58a6ff;
+}
+
+.log-success .log-message {
+  color: #3fb950;
+}
+
+.log-error .log-message {
+  color: #f85149;
+}
