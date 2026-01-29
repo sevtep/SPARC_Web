@@ -1,6 +1,6 @@
-// Ollama API client
+// LLM API client
 
-const OLLAMA_BASE_URL = '/ollama/api'
+const LLM_BASE_URL = 'http://localhost:3001/llm/v1'
 const DEFAULT_MODEL = process.env.REACT_APP_OLLAMA_MODEL || 'qwen3:8b'
 
 const SYSTEM_PROMPT = `You are a web page companion agent named "Cap" for the SPARC educational gaming platform. 
@@ -62,11 +62,10 @@ export async function sendAgentMessage(userMessage, availableAgentIds) {
 
   const request = {
     model: DEFAULT_MODEL,
-    stream: false,
     messages
   }
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/chat`, {
+  const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -76,11 +75,11 @@ export async function sendAgentMessage(userMessage, availableAgentIds) {
 
   if (!response.ok) {
     const errorText = await response.text()
-    throw new Error(`Ollama API error: ${response.status} - ${errorText}`)
+    throw new Error(`LLM API error: ${response.status} - ${errorText}`)
   }
 
   const data = await response.json()
-  return data.message.content
+  return data.choices[0].message.content
 }
 
 export function getModelName() {

@@ -1,15 +1,19 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
-  // Proxy for Ollama API
+  // Proxy for LLM API
   app.use(
-    '/ollama',
+    '/llm',
     createProxyMiddleware({
-      target: 'http://localhost:11434',
+      target: 'https://game.agaii.org',
       changeOrigin: true,
-      pathRewrite: {
-        '^/ollama': '', // remove /ollama prefix when forwarding
-      },
+      secure: true,
+      onProxyRes: (proxyRes, req, res) => {
+        // Fix duplicate CORS headers from server
+        delete proxyRes.headers['access-control-allow-origin'];
+        delete proxyRes.headers['access-control-allow-methods'];
+        delete proxyRes.headers['access-control-allow-headers'];
+      }
     })
   );
 };

@@ -84,7 +84,7 @@ export default function CompanionAgent() {
       setError(errorMessage)
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Connection error. Please make sure Ollama is running.',
+        content: 'Connection error. Please check your network connection.',
         error: true 
       }])
     } finally {

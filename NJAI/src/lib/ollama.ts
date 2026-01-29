@@ -1,27 +1,31 @@
-// Ollama API client
+// LLM API client
 
-const OLLAMA_BASE_URL = '/ollama/api'
+const LLM_BASE_URL = 'https://game.agaii.org/llm/v1'
 const DEFAULT_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'qwen3:8b'
 
-interface OllamaMessage {
+interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
   content: string
 }
 
-interface OllamaChatRequest {
+interface ChatRequest {
   model: string
-  stream: boolean
-  messages: OllamaMessage[]
+  messages: ChatMessage[]
 }
 
-interface OllamaChatResponse {
+interface ChatResponse {
+  id: string
+  object: string
+  created: number
   model: string
-  created_at: string
-  message: {
-    role: string
-    content: string
-  }
-  done: boolean
+  choices: Array<{
+    index: number
+    message: {
+      role: string
+      content: string
+    }
+    finish_reason: string
+  }>
 }
 
 const SYSTEM_PROMPT = `You are a web page companion agent. You MUST output ONLY valid JSON without any markdown formatting, code blocks, or explanatory text.
@@ -67,19 +71,18 @@ IMPORTANT Rules:
 5. Output ONLY the JSON object, no other text`
 
 export async function sendAgentMessage(userMessage: string, availableAgentIds: string[]): Promise<string> {
-  const messages: OllamaMessage[] = [
+  const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     { role: 'user', content: userMessage },
     { role: 'user', content: `Available agentId values you can use: ${availableAgentIds.join(', ')}. Only use these exact IDs.` }
   ]
 
-  const request: OllamaChatRequest = {
+  const request: ChatRequest = {
     model: DEFAULT_MODEL,
-    stream: false,
     messages
   }
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/chat`, {
+  const response = await fetch(`${LLM_BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -89,11 +92,11 @@ export async function sendAgentMessage(userMessage: string, availableAgentIds: s
 
   if (!response.ok) {
     const errorText = await response.text()
-    throw new Error(`Ollama API error: ${response.status} - ${errorText}`)
+    throw new Error(`LLM API error: ${response.status} - ${errorText}`)
   }
 
-  const data: OllamaChatResponse = await response.json()
-  return data.message.content
+  const data: ChatResponse = await response.json()
+  return data.choices[0].message.content
 }
 
 export function getModelName(): string {
