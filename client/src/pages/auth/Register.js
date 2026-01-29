@@ -7,6 +7,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    invite_code: '',
     password: '',
     confirmPassword: '',
     role: 'student',
@@ -34,6 +35,10 @@ const Register = () => {
     }
     if (!formData.email || !formData.email.includes('@')) {
       setError('Please enter a valid email address');
+      return false;
+    }
+    if (!formData.invite_code || formData.invite_code.length < 4) {
+      setError('Invite code is required');
       return false;
     }
     return true;
@@ -64,6 +69,7 @@ const Register = () => {
     const result = await register({
       username: formData.username,
       email: formData.email,
+      invite_code: formData.invite_code,
       password: formData.password,
       role: formData.role,
       school: formData.school,
@@ -144,6 +150,24 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   data-agent-id="input_email"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="invite_code">Invite Code</label>
+              <div className="input-with-icon">
+                <FiHome className="input-icon" />
+                <input
+                  type="text"
+                  id="invite_code"
+                  name="invite_code"
+                  className="form-input"
+                  placeholder="Enter your invite code"
+                  value={formData.invite_code}
+                  onChange={handleChange}
+                  required
+                  data-agent-id="input_invite_code"
                 />
               </div>
             </div>

@@ -58,15 +58,15 @@ const Login = () => {
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label" htmlFor="email">Email Address</label>
+          <label className="form-label" htmlFor="email">Email or Username</label>
           <div className="input-with-icon">
             <FiMail className="input-icon" />
             <input
-              type="email"
+              type="text"
               id="email"
               name="email"
               className="form-input"
-              placeholder="Enter your email"
+              placeholder="Enter email or username"
               value={formData.email}
               onChange={handleChange}
               required
