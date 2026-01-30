@@ -130,14 +130,12 @@ const GameDetail = () => {
                 </div>
               </div>
 
-              <a 
-                href={game.gameUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={`/games/${game.slug}/play`}
                 className="btn btn-primary btn-lg play-button"
               >
                 <FiPlay /> Play Now
-              </a>
+              </Link>
             </div>
 
             <div className="game-detail-visual">

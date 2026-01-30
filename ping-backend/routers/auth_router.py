@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import os
+import secrets
 import uuid
 
 from database import get_db
@@ -10,7 +11,7 @@ from models import User, ConsentRecord, UserRole, InviteCode, InviteUse, InviteR
 from schemas import (
     UserCreate, UserLogin, UserResponse, Token,
     GuestSessionCreate, GuestSessionResponse,
-    ConsentCreate, ConsentResponse, UserUpdate, PasswordUpdate
+    ConsentCreate, ConsentResponse, UserUpdate, PasswordUpdate, PasswordResetRequest
 )
 from auth import (
     verify_password, get_password_hash, 
@@ -291,6 +292,40 @@ async def update_me(
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.post("/password-reset")
+async def reset_password(
+    payload: PasswordResetRequest,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.email == payload.email).first()
+    if not user:
+        return {"success": True}
+
+    new_password = secrets.token_urlsafe(10).replace("-", "").replace("_", "")[:12]
+    user.hashed_password = get_password_hash(new_password)
+    db.commit()
+
+    template = db.query(EmailTemplate).filter(
+        EmailTemplate.key == "password_reset",
+        EmailTemplate.is_active == True
+    ).first()
+    subject = "Your PING password has been reset"
+    body = (
+        f"Hello {user.full_name or user.username or user.email}\n"
+        f"Your new password is: {new_password}\n"
+        "Please log in and change it."
+    )
+    if template:
+        subject = render_template(template.subject, {"user_name": user.full_name or user.username or user.email})
+        body = render_template(template.body, {"user_name": user.full_name or user.username or user.email, "new_password": new_password})
+    try:
+        send_email(user.email, subject, body)
+    except Exception:
+        pass
+
+    return {"success": True}
 
 
 @router.put("/password")

@@ -616,10 +616,10 @@ const Home = () => {
                   <span className="link-icon">🏆</span>
                   <span className="link-text">Hall of Fame</span>
                 </Link>
-                <Link to="/register" className="footer-link highlight">
+                <a href="https://ping.agaii.org/?auth=register" className="footer-link highlight">
                   <span className="link-icon">🚀</span>
                   <span className="link-text">Join the Adventure</span>
-                </Link>
+                </a>
               </div>
             </motion.div>
           </motion.div>

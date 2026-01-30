@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 import json
 
 from database import engine, get_db, SessionLocal
-from models import Base, User, UserRole, Organization, Module, EmailTemplate, ModuleWhitelist
+from models import Base, User, UserRole, Organization, Module, EmailTemplate, ModuleWhitelist, Subject
 from routers import auth_router
 from routers import telemetry_router
 from routers import class_router
@@ -108,21 +108,43 @@ def ensure_teacher_user(db: Session, organization_id: int):
     db.commit()
 
 
+def ensure_default_subjects(db: Session):
+    subjects = [
+        ("physics", "Physics", 0),
+        ("math", "Math", 10),
+        ("chemistry", "Chemistry", 20),
+        ("biology", "Biology", 30),
+        ("earth-science", "Earth & Space", 40)
+    ]
+    for key, name, order in subjects:
+        existing = db.query(Subject).filter(Subject.key == key).first()
+        if existing:
+            continue
+        db.add(Subject(key=key, name=name, sort_order=order, is_active=True))
+    db.commit()
+
+
 def ensure_default_modules(db: Session):
     existing = db.query(Module).filter(Module.module_id == "forces-motion-basics").first()
     if existing:
         if not existing.build_path:
             existing.build_path = "/games/Force&Motion/index.html"
             existing.is_published = True
-            db.commit()
+        if not existing.subject_id:
+            subject = db.query(Subject).filter(Subject.key == existing.subject).first()
+            if subject:
+                existing.subject_id = subject.id
+        db.commit()
         ensure_module_whitelist(db, existing, 1)
         return
 
+    subject = db.query(Subject).filter(Subject.key == "physics").first()
     module = Module(
         module_id="forces-motion-basics",
         title="Forces and Motion: Basics",
         description="Learn forces, motion, and driving dynamics.",
         subject="physics",
+        subject_id=subject.id if subject else None,
         build_path="/games/Force&Motion/index.html",
         is_published=True,
         version="1.0.0"
@@ -167,6 +189,11 @@ def ensure_default_email_templates(db: Session):
             "name": "Welcome",
             "subject": "Welcome to PING",
             "body": "Hello {{user_name}},\nWelcome to PING. Your account is ready."
+        },
+        "password_reset": {
+            "name": "Password Reset",
+            "subject": "Your PING password has been reset",
+            "body": "Hello {{user_name}},\nYour new password is: {{new_password}}\nPlease log in and change it."
         }
     }
 
@@ -218,6 +245,26 @@ def ensure_schema_updates():
                     WHERE table_name = 'users' AND column_name = 'avatar'
                 ) THEN
                     ALTER TABLE users ADD COLUMN avatar TEXT;
+                END IF;
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_name = 'subjects'
+                ) THEN
+                    CREATE TABLE subjects (
+                        id SERIAL PRIMARY KEY,
+                        key TEXT UNIQUE NOT NULL,
+                        name TEXT NOT NULL,
+                        is_active BOOLEAN DEFAULT TRUE,
+                        sort_order INTEGER DEFAULT 0,
+                        created_at TIMESTAMPTZ DEFAULT NOW(),
+                        updated_at TIMESTAMPTZ
+                    );
+                END IF;
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name = 'modules' AND column_name = 'subject_id'
+                ) THEN
+                    ALTER TABLE modules ADD COLUMN subject_id INTEGER;
                 END IF;
             END $$;
         """))

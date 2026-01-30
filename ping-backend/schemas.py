@@ -184,6 +184,10 @@ class UserUpdate(BaseModel):
     avatar: Optional[str] = None
 
 
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
 class PasswordUpdate(BaseModel):
     current_password: str
     new_password: str
@@ -215,6 +219,7 @@ class ModuleCreate(BaseModel):
     title: str
     description: Optional[str] = None
     subject: str
+    subject_id: Optional[int] = None
     build_path: Optional[str] = None
     is_published: bool = True
     version: Optional[str] = "1.0.0"
@@ -224,9 +229,37 @@ class ModuleUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     subject: Optional[str] = None
+    subject_id: Optional[int] = None
     build_path: Optional[str] = None
     is_published: Optional[bool] = None
     version: Optional[str] = None
+
+
+
+class SubjectCreate(BaseModel):
+    key: str
+    name: str
+    sort_order: Optional[int] = 0
+    is_active: Optional[bool] = True
+
+
+class SubjectUpdate(BaseModel):
+    name: Optional[str] = None
+    sort_order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+
+class SubjectResponse(BaseModel):
+    id: int
+    key: str
+    name: str
+    sort_order: int
+    is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
 
 
 class ModuleResponse(BaseModel):
@@ -235,6 +268,7 @@ class ModuleResponse(BaseModel):
     title: str
     description: Optional[str]
     subject: str
+    subject_id: Optional[int] = None
     build_path: Optional[str]
     is_published: bool
     version: Optional[str]

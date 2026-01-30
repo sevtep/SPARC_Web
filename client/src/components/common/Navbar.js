@@ -108,8 +108,8 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="auth-buttons">
-              <Link to="/login" className="btn btn-ghost" data-agent-id="btn_login">Login</Link>
-              <Link to="/register" className="btn btn-primary" data-agent-id="btn_register">Get Started</Link>
+              <a href="https://ping.agaii.org/?auth=login" className="btn btn-ghost" data-agent-id="btn_login">Login</a>
+              <a href="https://ping.agaii.org/?auth=register" className="btn btn-primary" data-agent-id="btn_register">Get Started</a>
             </div>
           )}
 
@@ -145,8 +145,8 @@ const Navbar = () => {
             ))}
             {!isAuthenticated && (
               <div className="mobile-auth">
-                <Link to="/login" className="btn btn-secondary">Login</Link>
-                <Link to="/register" className="btn btn-primary">Get Started</Link>
+                <a href="https://ping.agaii.org/?auth=login" className="btn btn-secondary">Login</a>
+                <a href="https://ping.agaii.org/?auth=register" className="btn btn-primary">Get Started</a>
               </div>
             )}
           </motion.div>

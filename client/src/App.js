@@ -19,13 +19,13 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Games from './pages/Games';
 import GameDetail from './pages/GameDetail';
+import GamePlay from './pages/GamePlay';
 import KnowledgeMap from './pages/KnowledgeMap';
 import Leaderboard from './pages/Leaderboard';
 import WordGameScores from './pages/WordGameScores';
 
 // Auth Pages
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
+import PingAuthRedirect from './pages/auth/PingAuthRedirect';
 
 // Student Pages
 import StudentDashboard from './pages/student/Dashboard';
@@ -98,6 +98,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/games" element={<Games />} />
         <Route path="/games/:slug" element={<GameDetail />} />
+        <Route path="/games/:slug/play" element={<GamePlay />} />
         <Route path="/knowledge-map" element={<KnowledgeMap />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/wordgame-scores" element={<WordGameScores />} />
@@ -105,8 +106,8 @@ function App() {
 
       {/* Auth Routes */}
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<PingAuthRedirect mode="login" />} />
+        <Route path="/register" element={<PingAuthRedirect mode="register" />} />
       </Route>
 
       {/* Student Routes */}

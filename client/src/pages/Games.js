@@ -251,15 +251,13 @@ const Games = () => {
                     >
                       Details <FiChevronRight />
                     </Link>
-                    <a 
-                      href={game.gameUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                    <Link 
+                      to={`/games/${game.slug}/play`}
                       className="btn-play"
                       data-agent-id={`game_play_${game.slug}`}
                     >
                       <FiPlay /> Play
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </motion.div>

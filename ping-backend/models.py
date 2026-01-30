@@ -120,7 +120,8 @@ class Module(Base):
     module_id = Column(String, unique=True, index=True, nullable=False)  # e.g., "forces-motion-basics"
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    subject = Column(String, nullable=False)  # physics, math, etc.
+    subject = Column(String, nullable=False)  # subject key for compatibility
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
     
     # Unity game metadata
     unity_version = Column(String, nullable=True)
@@ -136,7 +137,25 @@ class Module(Base):
     published_at = Column(DateTime(timezone=True), nullable=True)
     
     # Relationships
+    subject_ref = relationship("Subject", back_populates="modules")
     whitelist_entries = relationship("ModuleWhitelist", back_populates="module")
+
+
+
+class Subject(Base):
+    __tablename__ = "subjects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=0)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    modules = relationship("Module", back_populates="subject_ref")
+
 
 class ModuleWhitelist(Base):
     __tablename__ = "module_whitelist"

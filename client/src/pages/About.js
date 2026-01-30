@@ -221,9 +221,9 @@ const About = () => {
             <h2>Ready to Join the <span className="text-gradient">Adventure</span>?</h2>
             <p>Start your science learning journey today!</p>
             <div className="cta-buttons">
-              <Link to="/register" className="btn btn-primary btn-lg">
+              <a href="https://ping.agaii.org/?auth=register" className="btn btn-primary btn-lg">
                 Get Started Free
-              </Link>
+              </a>
               <Link to="/games" className="btn btn-secondary btn-lg">
                 Explore Games
               </Link>
