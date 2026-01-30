@@ -21,6 +21,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const incomingToken = params.get('token');
+    if (incomingToken) {
+      localStorage.setItem('sparc_token', incomingToken);
+      api.defaults.headers.common['Authorization'] = `Bearer ${incomingToken}`;
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+
     const token = localStorage.getItem('sparc_token');
     if (token) {
       try {
