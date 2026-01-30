@@ -616,7 +616,7 @@ const Home = () => {
                   <span className="link-icon">🏆</span>
                   <span className="link-text">Hall of Fame</span>
                 </Link>
-                <a href="https://ping.agaii.org/?auth=register" className="footer-link highlight">
+                <a href="https://ping.agaii.org/?auth=register&return=https%3A%2F%2Fgame.agaii.org" className="footer-link highlight">
                   <span className="link-icon">🚀</span>
                   <span className="link-text">Join the Adventure</span>
                 </a>
