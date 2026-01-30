@@ -222,7 +222,7 @@ const QuizCompetition = ({ isOpen, onClose }) => {
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     try {
-      const response = await fetch('/ollama/api/chat', {
+      const response = await fetch('/llm/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -240,7 +240,7 @@ const QuizCompetition = ({ isOpen, onClose }) => {
       
       if (response.ok) {
         const data = await response.json();
-        let answer = data.message?.content || "I don't know";
+        let answer = data.message?.content || data.choices?.[0]?.message?.content || "I don't know";
         
         // Remove <think> tags from qwen3
         answer = answer.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
@@ -327,7 +327,7 @@ Player Answer: ${playerAnswer || '(No answer)'}
 Cap Answer: ${capAnswer}`;
     
     try {
-      const response = await fetch('/ollama/api/chat', {
+      const response = await fetch('/llm/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -342,7 +342,7 @@ Cap Answer: ${capAnswer}`;
       
       if (response.ok) {
         const data = await response.json();
-        let judgeResponse = data.message?.content || 'PlayerScore: 0\nCapScore: 0\nFeedback: Unable to judge.';
+        let judgeResponse = data.message?.content || data.choices?.[0]?.message?.content || 'PlayerScore: 0\nCapScore: 0\nFeedback: Unable to judge.';
         
         // Remove <think> tags
         judgeResponse = judgeResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();

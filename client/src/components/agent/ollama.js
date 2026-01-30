@@ -1,6 +1,6 @@
 // LLM API client
 
-const LLM_BASE_URL = 'http://localhost:3001/llm/v1'
+const LLM_BASE_URL = process.env.REACT_APP_LLM_URL || '/llm/v1'
 const DEFAULT_MODEL = process.env.REACT_APP_OLLAMA_MODEL || 'qwen3:8b'
 
 const SYSTEM_PROMPT = `You are a web page companion agent named "Cap" for the SPARC educational gaming platform. 
