@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
-import { 
+import {
   FiUser, FiMail, FiEdit2, FiSave, FiCamera,
-  FiAward, FiTarget, FiClock, FiStar
+  FiAward, FiTarget, FiClock, FiStar, FiHome, FiBook
 } from 'react-icons/fi';
 import api from '../../services/api';
 import './Profile.css';
@@ -17,7 +17,9 @@ const Profile = () => {
     username: '',
     email: '',
     bio: '',
-    avatar: ''
+    avatar: '',
+    school: '',
+    course: ''
   });
 
   const avatars = [
@@ -31,7 +33,9 @@ const Profile = () => {
         username: user.username || '',
         email: user.email || '',
         bio: user.bio || '',
-        avatar: user.avatar || '👤'
+        avatar: user.avatar || '👤',
+        school: user.school || '',
+        course: user.course || ''
       });
     }
   }, [user]);
@@ -52,8 +56,11 @@ const Profile = () => {
     try {
       const res = await api.put('/users/profile', {
         username: formData.username,
+        email: formData.email,
         bio: formData.bio,
-        avatar: formData.avatar
+        avatar: formData.avatar,
+        school: formData.school,
+        course: formData.course
       });
 
       updateUser(res.data.data);
@@ -202,6 +209,34 @@ const Profile = () => {
               disabled
             />
             <p className="form-hint">Email cannot be changed</p>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              <FiHome /> School
+            </label>
+            <input
+              type="text"
+              name="school"
+              className="form-input"
+              value={formData.school}
+              onChange={handleChange}
+              disabled={!editing}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              <FiBook /> Course
+            </label>
+            <input
+              type="text"
+              name="course"
+              className="form-input"
+              value={formData.course}
+              onChange={handleChange}
+              disabled={!editing}
+            />
           </div>
 
           <div className="form-group">
