@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://ping.agaii.org/api/sparc';
+const API_URL = process.env.REACT_APP_API_URL || '/api/sparc';
 
 const api = axios.create({
   baseURL: API_URL,
