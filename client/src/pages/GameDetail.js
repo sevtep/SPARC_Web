@@ -7,76 +7,16 @@ import './GameDetail.css';
 
 // 静态游戏详情数据
 const staticGameDetails = {
-  'meeting-cells': {
-    name: 'Meeting Cells',
-    slug: 'meeting-cells',
-    description: 'Begin your journey into the bloodstream! Meet the different types of blood cells - red blood cells, white blood cells, and platelets. Learn their unique shapes, sizes, and vital roles in keeping the body healthy.',
-    category: 'biology',
-    difficulty: 'easy',
-    estimatedTime: 20,
-    gradeLevel: ['5', '6', '7', '8'],
-    gameUrl: '#',
-    learningObjectives: ['Identify different types of blood cells', 'Understand the function of red blood cells', 'Learn about white blood cells and immunity', 'Discover how platelets help with healing'],
-    statistics: { totalPlays: 0, averageScore: 0 }
-  },
-  'thumping-heart': {
-    name: 'Thumping Heart',
-    slug: 'thumping-heart',
-    description: 'Enter the powerful heart and feel its rhythm! Explore the four chambers, valves, and the electrical system that keeps your heart beating 100,000 times a day.',
-    category: 'biology',
-    difficulty: 'medium',
-    estimatedTime: 25,
-    gradeLevel: ['6', '7', '8', '9'],
-    gameUrl: '#',
-    learningObjectives: ['Understand the four chambers of the heart', 'Learn how valves control blood flow', 'Explore the cardiac cycle'],
-    statistics: { totalPlays: 0, averageScore: 0 }
-  },
-  'speed-oxygen': {
-    name: 'Need for Speed & Oxygen',
-    slug: 'speed-oxygen',
-    description: 'Race through the circulatory system! Experience the forces that propel blood through arteries and veins. Learn about blood pressure, flow dynamics, and how oxygen reaches every cell.',
-    category: 'biology',
+  'forces-motion-basics': {
+    name: 'Forces and Motion: Basics',
+    slug: 'forces-motion-basics',
+    description: 'Explore core physics with a driving simulator that explains forces, motion, and momentum.',
+    category: 'physics',
     difficulty: 'medium',
     estimatedTime: 30,
     gradeLevel: ['6', '7', '8', '9'],
-    gameUrl: 'https://game.agaii.org/Force&Motion',
-    learningObjectives: ['Understand blood pressure and flow dynamics', 'Learn how mass can affect speed', 'Discover how oxygen binds to hemoglobin'],
-    statistics: { totalPlays: 0, averageScore: 0 }
-  },
-  'sickle-cell': {
-    name: 'Sickle Cell Detective',
-    slug: 'sickle-cell',
-    description: 'Become a medical detective! Investigate sickle cell disease by measuring oxygen levels in healthy vs. sickle cells. Use data analysis to understand how cell shape affects oxygen-carrying capacity.',
-    category: 'biology',
-    difficulty: 'medium',
-    estimatedTime: 30,
-    gradeLevel: ['6', '7', '8', '9'],
-    gameUrl: '#',
-    learningObjectives: ['Understand sickle cell disease', 'Analyze data to find patterns', 'Learn how cell shape affects function'],
-    statistics: { totalPlays: 0, averageScore: 0 }
-  },
-  'fixing-vessels': {
-    name: 'Fixing Blood Vessels',
-    slug: 'fixing-vessels',
-    description: 'Use your surgical skills to repair damaged blood vessels! Learn about vessel structure, blood clots, and healing processes with AI-powered guidance.',
-    category: 'biology',
-    difficulty: 'hard',
-    estimatedTime: 35,
-    gradeLevel: ['7', '8', '9', '10'],
-    gameUrl: '#',
-    learningObjectives: ['Understand blood vessel structure', 'Learn about clot formation', 'Explore vessel repair processes'],
-    statistics: { totalPlays: 0, averageScore: 0 }
-  },
-  'cold-response': {
-    name: 'Cold Body Response',
-    slug: 'cold-response',
-    description: 'Discover how your body responds to cold temperatures! Learn about vasoconstriction, shivering, and the cardiovascular adjustments that keep you warm.',
-    category: 'biology',
-    difficulty: 'medium',
-    estimatedTime: 25,
-    gradeLevel: ['6', '7', '8', '9'],
-    gameUrl: '#',
-    learningObjectives: ['Understand thermoregulation', 'Learn about vasoconstriction', 'Explore how the heart responds to cold'],
+    gameUrl: 'https://ping.agaii.org/games/Force&Motion/index.html',
+    learningObjectives: ['Understand forces and motion', 'Analyze acceleration and momentum', 'Practice physics with interactive driving'],
     statistics: { totalPlays: 0, averageScore: 0 }
   }
 };
