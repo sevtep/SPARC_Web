@@ -17,6 +17,8 @@ const GamePlay = () => {
   const { slug } = useParams();
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasConsent, setHasConsent] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -37,6 +39,22 @@ const GamePlay = () => {
 
     fetchGame();
   }, [slug]);
+
+  useEffect(() => {
+    const storedConsent = localStorage.getItem('sparc_consent');
+    if (storedConsent === 'true') {
+      setHasConsent(true);
+      setShowConsent(false);
+    } else {
+      setShowConsent(true);
+    }
+  }, []);
+
+  const handleConsent = () => {
+    localStorage.setItem('sparc_consent', 'true');
+    setHasConsent(true);
+    setShowConsent(false);
+  };
 
   if (loading) {
     return (
@@ -81,12 +99,26 @@ const GamePlay = () => {
         </div>
 
         <div className="game-play-frame">
-          <iframe
-            title={game.name}
-            src={game.gameUrl}
-            frameBorder="0"
-            allowFullScreen
-          />
+          {showConsent && !hasConsent ? (
+            <div className="game-consent-card">
+              <h3>Before you play</h3>
+              <p>
+                This Unity WebGL experience runs inside SPARC. By continuing you agree to our
+                data collection and privacy terms.
+              </p>
+              <div className="game-consent-actions">
+                <button className="btn btn-primary" onClick={handleConsent}>I Agree</button>
+                <Link to="/games" className="btn btn-secondary">Back to Games</Link>
+              </div>
+            </div>
+          ) : (
+            <iframe
+              title={game.name}
+              src={game.gameUrl}
+              frameBorder="0"
+              allowFullScreen
+            />
+          )}
         </div>
       </div>
     </div>
