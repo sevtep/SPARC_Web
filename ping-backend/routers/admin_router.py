@@ -1,8 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
+from fastapi import BackgroundTasks, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func, case
+import os
+import re
+from pathlib import Path
+import tempfile
+import zipfile
+from datetime import datetime
 
 from database import get_db
-from models import User, UserRole, EmailTemplate, Module, ModuleWhitelist, Subject
+from models import User, UserRole, EmailTemplate, Module, ModuleWhitelist, Subject, BehaviorData
 from routers.auth_router import get_current_user
 from schemas import (
     EmailTemplateResponse,
@@ -16,6 +25,28 @@ from schemas import (
 )
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+TELEMETRY_DATA_DIR = os.getenv("TELEMETRY_DATA_DIR", "/mnt/data/pingdata/telemetry")
+
+
+def sanitize_segment(value: str) -> str:
+    safe = re.sub(r"[^A-Za-z0-9._-]+", "_", value or "").strip("_")
+    return safe or "unknown"
+
+
+def get_session_file_path(module_id: str, session_id: str) -> Path:
+    safe_module = sanitize_segment(module_id)
+    safe_session = sanitize_segment(session_id)
+    return Path(TELEMETRY_DATA_DIR) / safe_module / f"{safe_session}.jsonl.zst"
+
+
+def parse_date(value: str | None, end_of_day: bool = False) -> datetime | None:
+    if not value:
+        return None
+    dt = datetime.fromisoformat(value)
+    if end_of_day and len(value) == 10:
+        return dt.replace(hour=23, minute=59, second=59, microsecond=999999)
+    return dt
 
 
 def resolve_subject(db: Session, subject_id: int | None, subject_key: str | None):
@@ -88,6 +119,114 @@ async def update_subject(
     db.commit()
     db.refresh(subject)
     return subject
+
+
+@router.get("/telemetry/sessions")
+async def list_telemetry_sessions(
+    module_id: str | None = Query(default=None),
+    start_date: str | None = Query(default=None),
+    end_date: str | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_admin(current_user)
+
+    start_dt = parse_date(start_date)
+    end_dt = parse_date(end_date, end_of_day=True)
+
+    query = db.query(
+        BehaviorData.module_id,
+        BehaviorData.session_id,
+        func.count(BehaviorData.id).label("event_count"),
+        func.min(BehaviorData.timestamp).label("started_at"),
+        func.max(BehaviorData.timestamp).label("ended_at"),
+        func.sum(case((BehaviorData.event_type == 'text_input', 1), else_=0)).label("text_input_count")
+    )
+
+    if module_id:
+        query = query.filter(BehaviorData.module_id == module_id)
+    if start_dt:
+        query = query.filter(BehaviorData.timestamp >= start_dt)
+    if end_dt:
+        query = query.filter(BehaviorData.timestamp <= end_dt)
+
+    query = query.group_by(BehaviorData.module_id, BehaviorData.session_id)
+    total = query.count()
+    rows = query.order_by(func.max(BehaviorData.timestamp).desc()).offset(offset).limit(limit).all()
+
+    sessions = []
+    for row in rows:
+        file_path = get_session_file_path(row.module_id, row.session_id)
+        sessions.append({
+            "module_id": row.module_id,
+            "session_id": row.session_id,
+            "event_count": int(row.event_count or 0),
+            "text_input_count": int(row.text_input_count or 0),
+            "started_at": row.started_at.isoformat() if row.started_at else None,
+            "ended_at": row.ended_at.isoformat() if row.ended_at else None,
+            "file_exists": file_path.exists()
+        })
+
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "sessions": sessions
+    }
+
+
+@router.get("/telemetry/sessions/{session_id}/download")
+async def download_session_file(
+    session_id: str,
+    module_id: str = Query(...),
+    current_user: User = Depends(get_current_user)
+):
+    require_admin(current_user)
+    file_path = get_session_file_path(module_id, session_id)
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Telemetry file not found")
+    filename = f"{sanitize_segment(module_id)}-{sanitize_segment(session_id)}.jsonl.zst"
+    return FileResponse(path=str(file_path), filename=filename, media_type="application/zstd")
+
+
+@router.get("/telemetry/exports")
+async def download_all_sessions(
+    background_tasks: BackgroundTasks,
+    module_id: str = Query(...),
+    start_date: str | None = Query(default=None),
+    end_date: str | None = Query(default=None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_admin(current_user)
+
+    start_dt = parse_date(start_date)
+    end_dt = parse_date(end_date, end_of_day=True)
+
+    query = db.query(BehaviorData.session_id).filter(BehaviorData.module_id == module_id)
+    if start_dt:
+        query = query.filter(BehaviorData.timestamp >= start_dt)
+    if end_dt:
+        query = query.filter(BehaviorData.timestamp <= end_dt)
+
+    session_ids = [row[0] for row in query.distinct().all()]
+
+    temp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    temp.close()
+    zip_path = Path(temp.name)
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for sess_id in session_ids:
+            file_path = get_session_file_path(module_id, sess_id)
+            if file_path.exists():
+                arcname = f"{sanitize_segment(module_id)}/{file_path.name}"
+                zf.write(file_path, arcname=arcname)
+
+    background_tasks.add_task(zip_path.unlink, missing_ok=True)
+    filename = f"{sanitize_segment(module_id)}-telemetry.zip"
+    return FileResponse(path=str(zip_path), filename=filename, media_type="application/zip")
 
 
 @router.get("/email-templates", response_model=list[EmailTemplateResponse])
