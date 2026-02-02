@@ -14,7 +14,7 @@ from routers import admin_router
 from routers import simulation_router
 from routers import invite_router
 from routers import dashboard_router
-from routers import sparc_router
+from routers import sparc_router, subjects_router
 from app_registry import ensure_default_apps
 from routers.sparc_router import seed_wordgame_scores
 from auth import get_password_hash
@@ -32,6 +32,7 @@ def seed_apps():
     try:
         default_org_id = ensure_default_org(db)
         ensure_default_apps(db)
+        ensure_default_subjects(db)
         ensure_default_modules(db)
         ensure_default_email_templates(db)
         ensure_admin_user(db, default_org_id)
