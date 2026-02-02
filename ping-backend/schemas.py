@@ -262,15 +262,6 @@ class SubjectResponse(BaseModel):
         from_attributes = True
 
 
-class SubjectPublic(BaseModel):
-    key: str
-    name: str
-    sort_order: int
-
-    class Config:
-        from_attributes = True
-
-
 class ModuleResponse(BaseModel):
     id: int
     module_id: str
