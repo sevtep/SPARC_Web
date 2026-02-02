@@ -128,7 +128,7 @@ def ensure_default_modules(db: Session):
     existing = db.query(Module).filter(Module.module_id == "forces-motion-basics").first()
     if existing:
         if not existing.build_path:
-            existing.build_path = "/games/Force&Motion/Build/20251122DrivingBuild"
+            existing.build_path = "/games/Force&Motion"
             existing.is_published = True
         if not existing.subject_id:
             subject = db.query(Subject).filter(Subject.key == existing.subject).first()
@@ -145,7 +145,7 @@ def ensure_default_modules(db: Session):
         description="Learn forces, motion, and driving dynamics.",
         subject="physics",
         subject_id=subject.id if subject else None,
-        build_path="/games/Force&Motion/Build/20251122DrivingBuild",
+        build_path="/games/Force&Motion",
         is_published=True,
         version="1.0.0"
     )
