@@ -7,7 +7,7 @@ import secrets
 import uuid
 
 from database import get_db
-from models import User, ConsentRecord, UserRole, InviteCode, InviteUse, InviteRole, Class, ClassStudent, EmailTemplate
+from models import User, ConsentRecord, UserRole, InviteCode, InviteUse, InviteRole, Class, ClassStudent, EmailTemplate, Organization
 from schemas import (
     UserCreate, UserLogin, UserResponse, Token,
     GuestSessionCreate, GuestSessionResponse,
@@ -86,28 +86,30 @@ async def register_user(
 ):
     """Register a new user account"""
 
-    invite = db.query(InviteCode).filter(
-        InviteCode.code == user_data.invite_code,
-        InviteCode.is_active == True
-    ).first()
+    invite = None
+    if user_data.invite_code:
+        invite = db.query(InviteCode).filter(
+            InviteCode.code == user_data.invite_code,
+            InviteCode.is_active == True
+        ).first()
 
-    if not invite:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid invite code"
-        )
+        if not invite:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid invite code"
+            )
 
-    if invite.expires_at and invite.expires_at < datetime.utcnow():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invite code has expired"
-        )
+        if invite.expires_at and invite.expires_at < datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code has expired"
+            )
 
-    if invite.max_uses is not None and invite.uses >= invite.max_uses:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invite code usage limit reached"
-        )
+        if invite.max_uses is not None and invite.uses >= invite.max_uses:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code usage limit reached"
+            )
     
     # Check if email already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -128,19 +130,31 @@ async def register_user(
     
     # Create new user
     role = UserRole.STUDENT
-    if invite.role == InviteRole.TEACHER:
-        role = UserRole.TEACHER
-
-    organization_id = invite.organization_id
     class_obj = None
-    if invite.role == InviteRole.STUDENT and invite.class_id:
-        class_obj = db.query(Class).filter(Class.id == invite.class_id).first()
-        if not class_obj or not class_obj.is_active:
+    organization_id = None
+
+    if invite:
+        if invite.role == InviteRole.TEACHER:
+            role = UserRole.TEACHER
+
+        organization_id = invite.organization_id
+        if invite.role == InviteRole.STUDENT and invite.class_id:
+            class_obj = db.query(Class).filter(Class.id == invite.class_id).first()
+            if not class_obj or not class_obj.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invite class is not available"
+                )
+            organization_id = class_obj.organization_id
+
+    if not organization_id:
+        default_org = db.query(Organization).order_by(Organization.id.asc()).first()
+        if not default_org:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invite class is not available"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="No organization configured"
             )
-        organization_id = class_obj.organization_id
+        organization_id = default_org.id
 
     username = user_data.username or user_data.email.split('@')[0]
     full_name = user_data.full_name or username
@@ -162,7 +176,7 @@ async def register_user(
     db.add(new_user)
     db.flush()
 
-    if invite.role == InviteRole.STUDENT and class_obj:
+    if invite and invite.role == InviteRole.STUDENT and class_obj:
         db.add(ClassStudent(
             class_id=class_obj.id,
             user_id=new_user.id,
@@ -170,13 +184,14 @@ async def register_user(
             invited_by=invite.created_by
         ))
 
-    invite.uses += 1
-    db.add(InviteUse(
-        invite_id=invite.id,
-        user_id=new_user.id,
-        ip_address=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent")
-    ))
+    if invite:
+        invite.uses += 1
+        db.add(InviteUse(
+            invite_id=invite.id,
+            user_id=new_user.id,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent")
+        ))
 
     db.commit()
     db.refresh(new_user)

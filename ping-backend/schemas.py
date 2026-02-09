@@ -18,7 +18,7 @@ class UserCreate(BaseModel):
     password: str
     full_name: Optional[str] = None
     username: Optional[str] = None
-    invite_code: str
+    invite_code: Optional[str] = None
     school: Optional[str] = None
     course: Optional[str] = None
     bio: Optional[str] = None
@@ -45,6 +45,13 @@ class UserResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class UserAdminUpdate(BaseModel):
+    role: Optional[UserRole] = None
+    is_active: Optional[bool] = None
+    is_verified: Optional[bool] = None
+    organization_id: Optional[int] = None
+
 
 class Token(BaseModel):
     access_token: str

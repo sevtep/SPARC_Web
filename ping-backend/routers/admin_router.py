@@ -21,7 +21,9 @@ from schemas import (
     ModuleResponse,
     SubjectCreate,
     SubjectUpdate,
-    SubjectResponse
+    SubjectResponse,
+    UserResponse,
+    UserAdminUpdate
 )
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -227,6 +229,46 @@ async def download_all_sessions(
     background_tasks.add_task(zip_path.unlink, missing_ok=True)
     filename = f"{sanitize_segment(module_id)}-telemetry.zip"
     return FileResponse(path=str(zip_path), filename=filename, media_type="application/zip")
+
+
+@router.get("/users", response_model=list[UserResponse])
+async def list_users(
+    q: str | None = Query(default=None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_admin(current_user)
+    query = db.query(User).order_by(User.created_at.desc())
+    if q:
+        like = f"%{q.lower()}%"
+        query = query.filter(func.lower(User.email).like(like) | func.lower(User.username).like(like) | func.lower(User.full_name).like(like))
+    return query.all()
+
+
+@router.put("/users/{user_id}", response_model=UserResponse)
+async def update_user(
+    user_id: int,
+    payload: UserAdminUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_admin(current_user)
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if payload.role is not None:
+        user.role = payload.role
+    if payload.is_active is not None:
+        user.is_active = payload.is_active
+    if payload.is_verified is not None:
+        user.is_verified = payload.is_verified
+    if payload.organization_id is not None:
+        user.organization_id = payload.organization_id
+
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 @router.get("/email-templates", response_model=list[EmailTemplateResponse])
