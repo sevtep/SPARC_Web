@@ -154,6 +154,11 @@ class ClassTeacherTransferRequest(BaseModel):
     teacher_id: int
 
 
+class ClassStudentManageRequest(BaseModel):
+    user_id: Optional[int] = None
+    email: Optional[EmailStr] = None
+
+
 class ClassModuleTaskUpdate(BaseModel):
     is_active: bool
 

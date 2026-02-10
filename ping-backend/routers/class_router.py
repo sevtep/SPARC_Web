@@ -18,6 +18,7 @@ from schemas import (
     JoinedClassResponse,
     StudentClassTasks,
     StudentTaskModule,
+    ClassStudentManageRequest,
 )
 from routers.auth_router import get_current_user
 
@@ -537,6 +538,60 @@ async def get_class_students(
         })
 
     return students_data
+
+
+@router.post("/{class_id}/students")
+async def add_student_to_class(
+    class_id: int,
+    payload: ClassStudentManageRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    verify_teacher_access(current_user)
+    class_obj = db.query(Class).filter(Class.id == class_id, Class.is_active == True).first()
+    if not class_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Class not found")
+    verify_class_access(current_user, class_obj)
+
+    if not payload.user_id and not payload.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Provide user_id or email")
+
+    query = db.query(User)
+    if payload.user_id:
+        query = query.filter(User.id == payload.user_id)
+    else:
+        query = query.filter(func.lower(User.email) == payload.email.lower())
+    student = query.first()
+    if not student or student.role != UserRole.STUDENT:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
+    if student.organization_id != class_obj.organization_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Student must belong to the same organization")
+
+    existing = db.query(ClassStudent).filter(ClassStudent.class_id == class_id, ClassStudent.user_id == student.id).first()
+    if existing:
+        return {"success": True, "message": "Student already in class"}
+
+    db.add(ClassStudent(class_id=class_id, user_id=student.id))
+    db.commit()
+    return {"success": True}
+
+
+@router.delete("/{class_id}/students/{student_id}")
+async def remove_student_from_class(
+    class_id: int,
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    verify_teacher_access(current_user)
+    class_obj = db.query(Class).filter(Class.id == class_id).first()
+    if not class_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Class not found")
+    verify_class_access(current_user, class_obj)
+
+    db.query(ClassStudent).filter(ClassStudent.class_id == class_id, ClassStudent.user_id == student_id).delete(synchronize_session=False)
+    db.commit()
+    return {"success": True}
 
 @router.delete("/{class_id}")
 async def delete_class(

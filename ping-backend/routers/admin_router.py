@@ -106,13 +106,8 @@ async def list_organizations(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
-    query = db.query(Organization).order_by(Organization.name.asc())
-    if current_user.role == UserRole.ORG_ADMIN:
-        if not current_user.organization_id:
-            return []
-        query = query.filter(Organization.id == current_user.organization_id)
-    return query.all()
+    require_platform_admin(current_user)
+    return db.query(Organization).order_by(Organization.name.asc()).all()
 
 
 @router.post("/organizations", response_model=OrganizationResponse)
@@ -169,7 +164,7 @@ async def list_subjects(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     return db.query(Subject).order_by(Subject.sort_order.asc(), Subject.name.asc()).all()
 
 
@@ -279,7 +274,7 @@ async def download_session_file(
     module_id: str = Query(...),
     current_user: User = Depends(get_current_user)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     file_path = get_session_file_path(module_id, session_id)
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Telemetry file not found")
@@ -296,7 +291,7 @@ async def download_all_sessions(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
 
     start_dt = parse_date(start_date)
     end_dt = parse_date(end_date, end_of_day=True)
@@ -331,7 +326,7 @@ async def list_users(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
 
     query = db.query(User).order_by(User.created_at.desc())
     if current_user.role == UserRole.ORG_ADMIN:
@@ -352,7 +347,7 @@ async def update_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -362,8 +357,8 @@ async def update_user(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot manage users outside your organization")
         if payload.organization_id is not None and payload.organization_id != current_user.organization_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot change organization")
-        if payload.role == UserRole.PLATFORM_ADMIN:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot assign platform admin role")
+        if payload.role in [UserRole.ORG_ADMIN, UserRole.PLATFORM_ADMIN]:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot assign admin roles")
 
     if payload.role is not None:
         user.role = payload.role
@@ -388,7 +383,7 @@ async def deactivate_user(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     if current_user.id == user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot deactivate your own account")
 
@@ -460,7 +455,7 @@ async def list_email_templates(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     templates = db.query(EmailTemplate).order_by(EmailTemplate.key.asc()).all()
     return templates
 
@@ -472,7 +467,7 @@ async def update_email_template(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     template = db.query(EmailTemplate).filter(EmailTemplate.key == template_key).first()
     if not template:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
@@ -496,7 +491,7 @@ async def list_modules(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
     return db.query(Module).order_by(Module.created_at.desc()).all()
 
 
@@ -506,7 +501,7 @@ async def create_module(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
 
     existing = db.query(Module).filter(Module.module_id == payload.module_id).first()
     if existing:
@@ -549,7 +544,7 @@ async def update_module(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    require_admin(current_user)
+    require_platform_admin(current_user)
 
     module = db.query(Module).filter(Module.module_id == module_id).first()
     if not module:
