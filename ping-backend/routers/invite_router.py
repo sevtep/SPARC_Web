@@ -5,7 +5,7 @@ import random
 import string
 
 from database import get_db
-from models import InviteCode, InviteRole, User, UserRole, Class, EmailTemplate
+from models import InviteCode, InviteRole, User, UserRole, Class, EmailTemplate, InviteUse, ClassStudent
 from schemas import InviteCreate, InviteResponse
 from email_service import send_email, render_template
 from routers.auth_router import get_current_user
@@ -197,3 +197,40 @@ async def toggle_invite(
     db.commit()
     db.refresh(invite)
     return invite
+
+
+@router.delete("/{invite_id}")
+async def delete_invite(
+    invite_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Hard delete an invite code.
+
+    Notes:
+    - Detaches invite references from ClassStudent (invite_id -> NULL)
+    - Deletes InviteUse rows for this invite
+    """
+    verify_teacher_access(current_user)
+
+    invite = db.query(InviteCode).filter(InviteCode.id == invite_id).first()
+    if not invite:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invite not found")
+
+    if current_user.role == UserRole.PLATFORM_ADMIN:
+        pass
+    elif current_user.role == UserRole.ORG_ADMIN:
+        if not current_user.organization_id or invite.organization_id != current_user.organization_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No access to this invite")
+    else:
+        if invite.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No access to this invite")
+
+    db.query(ClassStudent).filter(ClassStudent.invite_id == invite.id).update(
+        {ClassStudent.invite_id: None}, synchronize_session=False
+    )
+    db.query(InviteUse).filter(InviteUse.invite_id == invite.id).delete(synchronize_session=False)
+    db.delete(invite)
+    db.commit()
+
+    return {"success": True}
