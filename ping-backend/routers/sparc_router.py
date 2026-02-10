@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 
@@ -209,7 +209,11 @@ def sparc_register(payload: SparcRegisterIn, request: Request, db: Session = Dep
 
     if not invite:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid invite code")
-    if invite.expires_at and invite.expires_at < datetime.utcnow():
+    if invite.expires_at:
+        expires_at = invite.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at.astimezone(timezone.utc) < datetime.now(timezone.utc):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invite code has expired")
     if invite.max_uses is not None and invite.uses >= invite.max_uses:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invite code usage limit reached")
