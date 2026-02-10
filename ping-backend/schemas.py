@@ -134,6 +134,8 @@ class ClassResponse(BaseModel):
     description: Optional[str]
     join_code: str
     teacher_id: int
+    teacher_name: Optional[str] = None
+    teacher_email: Optional[str] = None
     organization_id: Optional[int]
     is_active: bool
     created_at: datetime
@@ -146,6 +148,60 @@ class ClassWithStats(ClassResponse):
     guest_count: int = 0
     total_sessions: int = 0
     module_count: int = 0
+
+
+class ClassTeacherTransferRequest(BaseModel):
+    teacher_id: int
+
+
+class ClassModuleTaskUpdate(BaseModel):
+    is_active: bool
+
+
+class ClassModuleTaskResponse(BaseModel):
+    module_id: str
+    title: str
+    subject: str
+    build_path: Optional[str] = None
+    is_active: bool
+    played_students: int
+    total_students: int
+
+
+class ClassModuleStudentStatus(BaseModel):
+    user_id: int
+    name: str
+    email: Optional[str] = None
+    played: bool
+    total_sessions: int
+    total_events: int
+    last_active: Optional[datetime] = None
+
+
+class JoinedClassResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    teacher_name: Optional[str] = None
+    teacher_email: Optional[str] = None
+    organization_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class StudentTaskModule(BaseModel):
+    module_id: str
+    title: str
+    subject: str
+    build_path: Optional[str] = None
+
+
+class StudentClassTasks(BaseModel):
+    class_id: int
+    class_name: str
+    teacher_name: Optional[str] = None
+    modules: list[StudentTaskModule]
 
 class JoinCodeValidate(BaseModel):
     join_code: str

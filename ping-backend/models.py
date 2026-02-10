@@ -113,6 +113,23 @@ class ClassStudent(Base):
         UniqueConstraint("class_id", "user_id", name="uq_class_students"),
     )
 
+
+class ClassModuleTask(Base):
+    __tablename__ = "class_module_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
+    module_id = Column(Integer, ForeignKey("modules.id"), nullable=False)
+
+    is_active = Column(Boolean, default=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("class_id", "module_id", name="uq_class_module_tasks"),
+    )
+
 class Module(Base):
     __tablename__ = "modules"
 
