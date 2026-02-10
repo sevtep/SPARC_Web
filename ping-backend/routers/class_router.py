@@ -10,7 +10,7 @@ from database import get_db
 from models import User, Class, Module, ModuleWhitelist, BehaviorData, UserRole, ClassStudent
 from schemas import (
     ClassCreate, ClassUpdate, ClassResponse, ClassWithStats,
-    JoinCodeValidate, JoinClassRequest, StudentProgress
+    JoinCodeValidate, JoinClassRequest, StudentProgress, ModuleResponse
 )
 from routers.auth_router import get_current_user
 
@@ -36,9 +36,40 @@ def get_class_module_ids(db: Session, class_obj: Class) -> List[str]:
         ModuleWhitelist, ModuleWhitelist.module_id == Module.id
     ).filter(
         ModuleWhitelist.organization_id == class_obj.organization_id,
-        ModuleWhitelist.is_enabled == True
+        ModuleWhitelist.is_enabled == True,
+        Module.is_published == True
     ).all()
     return [module_id for (module_id,) in module_ids]
+
+
+@router.get("/{class_id}/modules", response_model=list[ModuleResponse])
+async def get_class_modules(
+    class_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """List published modules available to this class (org whitelist)."""
+    verify_teacher_access(current_user)
+
+    class_obj = db.query(Class).filter(Class.id == class_id).first()
+    if not class_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Class not found")
+
+    if class_obj.teacher_id != current_user.id:
+        if current_user.role == UserRole.PLATFORM_ADMIN:
+            pass
+        elif current_user.role != UserRole.ORG_ADMIN or class_obj.organization_id != current_user.organization_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have access to this class")
+
+    modules = db.query(Module).join(
+        ModuleWhitelist, ModuleWhitelist.module_id == Module.id
+    ).filter(
+        ModuleWhitelist.organization_id == class_obj.organization_id,
+        ModuleWhitelist.is_enabled == True,
+        Module.is_published == True
+    ).order_by(Module.title.asc()).all()
+
+    return modules
 
 @router.post("/", response_model=ClassResponse)
 async def create_class(
