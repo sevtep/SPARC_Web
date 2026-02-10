@@ -99,6 +99,13 @@ class OrganizationBase(BaseModel):
 class OrganizationCreate(OrganizationBase):
     consent_text: Optional[str] = None
     privacy_policy: Optional[str] = None
+
+
+class OrganizationUpdate(BaseModel):
+    name: Optional[str] = None
+    domain: Optional[str] = None
+    is_active: Optional[bool] = None
+    data_collection_enabled: Optional[bool] = None
     
 class OrganizationResponse(BaseModel):
     id: int

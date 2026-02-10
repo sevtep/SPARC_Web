@@ -45,7 +45,8 @@ from schemas import (
     UserResponse,
     UserAdminUpdate,
     OrganizationResponse,
-    OrganizationCreate
+    OrganizationCreate,
+    OrganizationUpdate
 )
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -132,6 +133,32 @@ async def create_organization(
         is_active=True
     )
     db.add(org)
+    db.commit()
+    db.refresh(org)
+    return org
+
+
+@router.put("/organizations/{org_id}", response_model=OrganizationResponse)
+async def update_organization(
+    org_id: int,
+    payload: OrganizationUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_platform_admin(current_user)
+    org = db.query(Organization).filter(Organization.id == org_id).first()
+    if not org:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
+
+    if payload.name is not None:
+        org.name = payload.name
+    if payload.domain is not None:
+        org.domain = payload.domain
+    if payload.is_active is not None:
+        org.is_active = payload.is_active
+    if payload.data_collection_enabled is not None:
+        org.data_collection_enabled = payload.data_collection_enabled
+
     db.commit()
     db.refresh(org)
     return org
