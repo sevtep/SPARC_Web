@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime, timedelta
 import random
@@ -338,81 +339,49 @@ async def get_class_students(
                 detail="You don't have access to this class"
             )
     
-    students_data = []
-    
-    # Get registered students who participated
-    module_ids = get_class_module_ids(db, class_obj)
-    if not module_ids:
+    # Primary source of truth: ClassStudent membership
+    members = db.query(User).join(
+        ClassStudent, User.id == ClassStudent.user_id
+    ).filter(
+        ClassStudent.class_id == class_obj.id
+    ).order_by(User.created_at.asc()).all()
+
+    if not members:
         return []
 
-    registered_students = db.query(User).join(
-        BehaviorData, User.id == BehaviorData.user_id
-    ).filter(
-        BehaviorData.module_id.in_(module_ids)
-    ).distinct().all()
-    
-    for student in registered_students:
-        # Get student's sessions
-        sessions = db.query(BehaviorData.session_id).filter(
-            BehaviorData.user_id == student.id,
+    module_ids = get_class_module_ids(db, class_obj)
+    member_ids = [student.id for student in members]
+
+    stats_by_user_id = {}
+    if module_ids:
+        rows = db.query(
+            BehaviorData.user_id.label("user_id"),
+            func.count(func.distinct(BehaviorData.session_id)).label("total_sessions"),
+            func.count(BehaviorData.id).label("total_events"),
+            func.max(BehaviorData.timestamp).label("last_active"),
+        ).filter(
+            BehaviorData.user_id.isnot(None),
+            BehaviorData.user_id.in_(member_ids),
             BehaviorData.module_id.in_(module_ids)
-        ).distinct().all()
-        
-        # Get total events
-        total_events = db.query(BehaviorData).filter(
-            BehaviorData.user_id == student.id,
-            BehaviorData.module_id.in_(module_ids)
-        ).count()
-        
-        # Get last active time
-        last_active = db.query(BehaviorData.timestamp).filter(
-            BehaviorData.user_id == student.id
-        ).order_by(BehaviorData.timestamp.desc()).first()
-        
+        ).group_by(
+            BehaviorData.user_id
+        ).all()
+
+        stats_by_user_id = {row.user_id: row for row in rows}
+
+    students_data = []
+    for student in members:
+        stats = stats_by_user_id.get(student.id)
         students_data.append({
             "user_id": student.id,
             "guest_id": None,
-            "name": student.full_name or student.username,
+            "name": student.full_name or student.username or "Unknown",
             "email": student.email,
-            "total_sessions": len(sessions),
-            "total_events": total_events,
-            "last_active": last_active[0] if last_active else None
+            "total_sessions": int(stats.total_sessions) if stats else 0,
+            "total_events": int(stats.total_events) if stats else 0,
+            "last_active": stats.last_active if stats else None
         })
-    
-    # Get guest students
-    guest_sessions = db.query(BehaviorData.guest_session_id).filter(
-        BehaviorData.guest_session_id.isnot(None),
-        BehaviorData.module_id.in_(module_ids)
-    ).distinct().all()
-    
-    for (guest_id,) in guest_sessions:
-        # Get guest's sessions
-        sessions = db.query(BehaviorData.session_id).filter(
-            BehaviorData.guest_session_id == guest_id,
-            BehaviorData.module_id.in_(module_ids)
-        ).distinct().all()
-        
-        # Get total events
-        total_events = db.query(BehaviorData).filter(
-            BehaviorData.guest_session_id == guest_id,
-            BehaviorData.module_id.in_(module_ids)
-        ).count()
-        
-        # Get last active time
-        last_active = db.query(BehaviorData.timestamp).filter(
-            BehaviorData.guest_session_id == guest_id
-        ).order_by(BehaviorData.timestamp.desc()).first()
-        
-        students_data.append({
-            "user_id": None,
-            "guest_id": guest_id,
-            "name": f"Guest-{guest_id[:8]}",
-            "email": None,
-            "total_sessions": len(sessions),
-            "total_events": total_events,
-            "last_active": last_active[0] if last_active else None
-        })
-    
+
     return students_data
 
 @router.delete("/{class_id}")
