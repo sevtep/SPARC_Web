@@ -1,6 +1,7 @@
 import os
 import smtplib
 from email.message import EmailMessage
+from email.utils import formatdate, make_msgid
 
 
 def send_email(recipient: str, subject: str, body: str) -> None:
@@ -18,6 +19,8 @@ def send_email(recipient: str, subject: str, body: str) -> None:
 
     message = EmailMessage()
     message["Subject"] = subject
+    message["Date"] = formatdate(localtime=True)
+    message["Message-ID"] = make_msgid()
     if sender_name:
         message["From"] = f"{sender_name} <{sender}>"
     else:
