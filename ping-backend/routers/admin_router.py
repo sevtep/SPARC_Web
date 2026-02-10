@@ -11,7 +11,27 @@ import zipfile
 from datetime import datetime
 
 from database import get_db
-from models import User, UserRole, EmailTemplate, Module, ModuleWhitelist, Subject, BehaviorData, Organization
+from models import (
+    User,
+    UserRole,
+    EmailTemplate,
+    Module,
+    ModuleWhitelist,
+    Subject,
+    BehaviorData,
+    Organization,
+    Class,
+    ClassStudent,
+    InviteCode,
+    InviteUse,
+    ConsentRecord,
+    AuditLog,
+    SparcWordGameScore,
+    SparcGameSession,
+    ExternalAccount,
+    AppSession,
+    AppEvent,
+)
 from routers.auth_router import get_current_user
 from schemas import (
     EmailTemplateResponse,
@@ -357,6 +377,55 @@ async def deactivate_user(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.delete("/users/{user_id}/hard")
+async def hard_delete_user(
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_platform_admin(current_user)
+
+    if current_user.id == user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete your own account")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    classes_teaching = db.query(Class.id).filter(Class.teacher_id == user_id).count()
+    if classes_teaching:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot delete a teacher account with active classes. Reassign or delete the classes first."
+        )
+
+    invite_ids = [row[0] for row in db.query(InviteCode.id).filter(InviteCode.created_by == user_id).all()]
+
+    db.query(ClassStudent).filter(ClassStudent.user_id == user_id).delete(synchronize_session=False)
+    db.query(InviteUse).filter(InviteUse.user_id == user_id).delete(synchronize_session=False)
+
+    if invite_ids:
+        db.query(ClassStudent).filter(ClassStudent.invite_id.in_(invite_ids)).update(
+            {ClassStudent.invite_id: None}, synchronize_session=False
+        )
+        db.query(InviteUse).filter(InviteUse.invite_id.in_(invite_ids)).delete(synchronize_session=False)
+        db.query(InviteCode).filter(InviteCode.id.in_(invite_ids)).delete(synchronize_session=False)
+
+    db.query(BehaviorData).filter(BehaviorData.user_id == user_id).update({BehaviorData.user_id: None}, synchronize_session=False)
+    db.query(ConsentRecord).filter(ConsentRecord.user_id == user_id).update({ConsentRecord.user_id: None}, synchronize_session=False)
+    db.query(AuditLog).filter(AuditLog.user_id == user_id).update({AuditLog.user_id: None}, synchronize_session=False)
+    db.query(SparcWordGameScore).filter(SparcWordGameScore.user_id == user_id).update({SparcWordGameScore.user_id: None}, synchronize_session=False)
+    db.query(AppSession).filter(AppSession.user_id == user_id).update({AppSession.user_id: None}, synchronize_session=False)
+    db.query(AppEvent).filter(AppEvent.user_id == user_id).update({AppEvent.user_id: None}, synchronize_session=False)
+
+    db.query(ExternalAccount).filter(ExternalAccount.user_id == user_id).delete(synchronize_session=False)
+    db.query(SparcGameSession).filter(SparcGameSession.user_id == user_id).delete(synchronize_session=False)
+
+    db.delete(user)
+    db.commit()
+    return {"success": True, "deleted_user_id": user_id}
 
 
 @router.get("/email-templates", response_model=list[EmailTemplateResponse])
