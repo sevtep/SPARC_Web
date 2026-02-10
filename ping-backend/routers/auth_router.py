@@ -19,7 +19,7 @@ from auth import (
 )
 from email_service import send_email, render_template
 
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
@@ -152,7 +152,15 @@ async def register_user(
             organization_id = class_obj.organization_id
 
     if not organization_id:
-        default_org = db.query(Organization).order_by(Organization.id.asc()).first()
+        email_domain = user_data.email.split('@')[-1].strip().lower() if user_data.email else ''
+        matched_org = None
+        if email_domain:
+            matched_org = db.query(Organization).filter(
+                Organization.is_active == True,
+                func.lower(Organization.domain) == email_domain
+            ).first()
+
+        default_org = matched_org or db.query(Organization).order_by(Organization.id.asc()).first()
         if not default_org:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

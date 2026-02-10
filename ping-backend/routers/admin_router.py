@@ -11,7 +11,7 @@ import zipfile
 from datetime import datetime
 
 from database import get_db
-from models import User, UserRole, EmailTemplate, Module, ModuleWhitelist, Subject, BehaviorData
+from models import User, UserRole, EmailTemplate, Module, ModuleWhitelist, Subject, BehaviorData, Organization
 from routers.auth_router import get_current_user
 from schemas import (
     EmailTemplateResponse,
@@ -23,7 +23,9 @@ from schemas import (
     SubjectUpdate,
     SubjectResponse,
     UserResponse,
-    UserAdminUpdate
+    UserAdminUpdate,
+    OrganizationResponse,
+    OrganizationCreate
 )
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -68,6 +70,51 @@ def require_admin(current_user: User):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"
         )
+
+
+def require_platform_admin(current_user: User):
+    if current_user.role != UserRole.PLATFORM_ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Platform admin access required"
+        )
+
+
+@router.get("/organizations", response_model=list[OrganizationResponse])
+async def list_organizations(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_admin(current_user)
+    query = db.query(Organization).order_by(Organization.name.asc())
+    if current_user.role == UserRole.ORG_ADMIN:
+        if not current_user.organization_id:
+            return []
+        query = query.filter(Organization.id == current_user.organization_id)
+    return query.all()
+
+
+@router.post("/organizations", response_model=OrganizationResponse)
+async def create_organization(
+    payload: OrganizationCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_platform_admin(current_user)
+    existing = db.query(Organization).filter(func.lower(Organization.name) == payload.name.lower()).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Organization name already exists")
+    org = Organization(
+        name=payload.name,
+        domain=payload.domain,
+        consent_text=payload.consent_text,
+        privacy_policy=payload.privacy_policy,
+        is_active=True
+    )
+    db.add(org)
+    db.commit()
+    db.refresh(org)
+    return org
 
 
 @router.get("/subjects", response_model=list[SubjectResponse])
@@ -238,7 +285,13 @@ async def list_users(
     db: Session = Depends(get_db)
 ):
     require_admin(current_user)
+
     query = db.query(User).order_by(User.created_at.desc())
+    if current_user.role == UserRole.ORG_ADMIN:
+        if not current_user.organization_id:
+            return []
+        query = query.filter(User.organization_id == current_user.organization_id)
+
     if q:
         like = f"%{q.lower()}%"
         query = query.filter(func.lower(User.email).like(like) | func.lower(User.username).like(like) | func.lower(User.full_name).like(like))
@@ -257,6 +310,14 @@ async def update_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+    if current_user.role == UserRole.ORG_ADMIN:
+        if not current_user.organization_id or user.organization_id != current_user.organization_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot manage users outside your organization")
+        if payload.organization_id is not None and payload.organization_id != current_user.organization_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot change organization")
+        if payload.role == UserRole.PLATFORM_ADMIN:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot assign platform admin role")
+
     if payload.role is not None:
         user.role = payload.role
     if payload.is_active is not None:
@@ -264,8 +325,35 @@ async def update_user(
     if payload.is_verified is not None:
         user.is_verified = payload.is_verified
     if payload.organization_id is not None:
+        org = db.query(Organization).filter(Organization.id == payload.organization_id).first()
+        if not org:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Organization not found")
         user.organization_id = payload.organization_id
 
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.delete("/users/{user_id}", response_model=UserResponse)
+async def deactivate_user(
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    require_admin(current_user)
+    if current_user.id == user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot deactivate your own account")
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if current_user.role == UserRole.ORG_ADMIN:
+        if not current_user.organization_id or user.organization_id != current_user.organization_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot manage users outside your organization")
+
+    user.is_active = False
     db.commit()
     db.refresh(user)
     return user
