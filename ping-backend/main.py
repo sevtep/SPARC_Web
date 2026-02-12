@@ -310,6 +310,21 @@ def ensure_schema_updates():
                 ) THEN
                     ALTER TABLE modules ADD COLUMN subject_id INTEGER;
                 END IF;
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_name = 'user_module_completions'
+                ) THEN
+                    CREATE TABLE user_module_completions (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id),
+                        module_id TEXT NOT NULL,
+                        completed_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+                        last_session_id TEXT,
+                        CONSTRAINT uq_user_module_completions UNIQUE (user_id, module_id)
+                    );
+                    CREATE INDEX idx_user_module_completions_user_id ON user_module_completions(user_id);
+                    CREATE INDEX idx_user_module_completions_module_id ON user_module_completions(module_id);
+                END IF;
             END $$;
         """)
         )

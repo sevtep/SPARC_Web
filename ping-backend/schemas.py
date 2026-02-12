@@ -1,7 +1,8 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Optional, List
 from datetime import datetime, date
 from models import UserRole
+
 
 # User Schemas
 class UserBase(BaseModel):
@@ -12,6 +13,7 @@ class UserBase(BaseModel):
     course: Optional[str] = None
     bio: Optional[str] = None
     avatar: Optional[str] = None
+
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -24,9 +26,11 @@ class UserCreate(BaseModel):
     bio: Optional[str] = None
     avatar: Optional[str] = None
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class UserResponse(BaseModel):
     id: int
@@ -42,9 +46,12 @@ class UserResponse(BaseModel):
     is_verified: bool
     organization_id: Optional[int]
     created_at: datetime
-    
+    completed_modules_count: int = 0
+    completed_module_ids: List[str] = Field(default_factory=list)
+
     class Config:
         from_attributes = True
+
 
 class UserAdminUpdate(BaseModel):
     role: Optional[UserRole] = None
@@ -57,13 +64,16 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     email: Optional[str] = None
     user_id: Optional[int] = None
 
+
 # Guest Session
 class GuestSessionCreate(BaseModel):
     session_id: str
+
 
 class GuestSessionResponse(BaseModel):
     guest_id: str
@@ -71,12 +81,14 @@ class GuestSessionResponse(BaseModel):
     access_token: str
     token_type: str
 
+
 # Consent Schemas
 class ConsentCreate(BaseModel):
     terms_accepted: bool
     privacy_accepted: bool
     data_collection_accepted: bool
     cookie_accepted: Optional[bool] = None
+
 
 class ConsentResponse(BaseModel):
     id: int
@@ -87,14 +99,16 @@ class ConsentResponse(BaseModel):
     data_collection_accepted: bool
     cookie_accepted: Optional[bool]
     consented_at: datetime
-    
+
     class Config:
         from_attributes = True
+
 
 # Organization Schemas
 class OrganizationBase(BaseModel):
     name: str
     domain: Optional[str] = None
+
 
 class OrganizationCreate(OrganizationBase):
     consent_text: Optional[str] = None
@@ -106,7 +120,8 @@ class OrganizationUpdate(BaseModel):
     domain: Optional[str] = None
     is_active: Optional[bool] = None
     data_collection_enabled: Optional[bool] = None
-    
+
+
 class OrganizationResponse(BaseModel):
     id: int
     name: str
@@ -114,19 +129,22 @@ class OrganizationResponse(BaseModel):
     is_active: bool
     data_collection_enabled: bool
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
+
 
 # Class Schemas
 class ClassCreate(BaseModel):
     name: str
     description: Optional[str] = None
 
+
 class ClassUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     is_active: Optional[bool] = None
+
 
 class ClassResponse(BaseModel):
     id: int
@@ -139,9 +157,10 @@ class ClassResponse(BaseModel):
     organization_id: Optional[int]
     is_active: bool
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
+
 
 class ClassWithStats(ClassResponse):
     student_count: int = 0
@@ -181,6 +200,8 @@ class ClassModuleStudentStatus(BaseModel):
     total_sessions: int
     total_events: int
     last_active: Optional[datetime] = None
+    completed: bool = False
+    completed_at: Optional[datetime] = None
 
 
 class JoinedClassResponse(BaseModel):
@@ -208,12 +229,14 @@ class StudentClassTasks(BaseModel):
     teacher_name: Optional[str] = None
     modules: list[StudentTaskModule]
 
+
 class JoinCodeValidate(BaseModel):
     join_code: str
 
 
 class JoinClassRequest(BaseModel):
     join_code: str
+
 
 class StudentProgress(BaseModel):
     user_id: Optional[int]
@@ -223,6 +246,7 @@ class StudentProgress(BaseModel):
     total_sessions: int
     total_events: int
     last_active: Optional[datetime]
+    completed_modules_count: int = 0
 
 
 class InviteCreate(BaseModel):
@@ -310,7 +334,6 @@ class ModuleUpdate(BaseModel):
     version: Optional[str] = None
 
 
-
 class SubjectCreate(BaseModel):
     key: str
     name: str
@@ -362,10 +385,12 @@ class ModuleResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 # Telemetry Schemas
 class TelemetrySessionCreate(BaseModel):
     module_id: str
-    
+
+
 class TelemetryEventCreate(BaseModel):
     session_id: str
     user_id: Optional[int] = None
@@ -376,9 +401,11 @@ class TelemetryEventCreate(BaseModel):
     timestamp: str
     client_timestamp: int
 
+
 class TelemetryEventBatch(BaseModel):
     session_id: str
     events: List[TelemetryEventCreate]
+
 
 # Behavior Data Schemas (legacy - being replaced by Telemetry)
 class BehaviorDataCreate(BaseModel):
@@ -386,6 +413,7 @@ class BehaviorDataCreate(BaseModel):
     session_id: str
     event_type: str
     event_data: Optional[str] = None
+
 
 class BehaviorDataResponse(BaseModel):
     id: int
@@ -396,7 +424,7 @@ class BehaviorDataResponse(BaseModel):
     event_type: str
     event_data: Optional[str]
     timestamp: datetime
-    
+
     class Config:
         from_attributes = True
 
