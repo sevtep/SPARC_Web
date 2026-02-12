@@ -163,6 +163,13 @@ def ensure_default_modules(db: Session):
             "build_path": "/games/racegame/Build/racegame",
             "cover_image_url": "/images/racegame-cover.png",
         },
+        {
+            "module_id": "geotech-game",
+            "title": "GeoTech Field Lab",
+            "description": "Complete integrated geotechnical field tasks across map, lab, and analysis scenes.",
+            "build_path": "/games/geotech/Build/geotech",
+            "cover_image_url": "/images/geotech-cover.png",
+        },
     ]
 
     for item in default_modules:
