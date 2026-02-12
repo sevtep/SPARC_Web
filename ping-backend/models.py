@@ -169,6 +169,7 @@ class Module(Base):
     # Unity game metadata
     unity_version = Column(String, nullable=True)
     build_path = Column(String, nullable=True)
+    cover_image_url = Column(String, nullable=True)
 
     # Publishing
     is_published = Column(Boolean, default=False)

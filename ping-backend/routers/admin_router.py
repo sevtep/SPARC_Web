@@ -661,6 +661,7 @@ async def create_module(
         subject=subject.key if subject else payload.subject,
         subject_id=subject.id if subject else None,
         build_path=payload.build_path,
+        cover_image_url=payload.cover_image_url,
         is_published=payload.is_published,
         version=payload.version or "1.0.0",
     )
@@ -718,6 +719,8 @@ async def update_module(
             module.subject_id = None
     if payload.build_path is not None:
         module.build_path = payload.build_path
+    if payload.cover_image_url is not None:
+        module.cover_image_url = payload.cover_image_url
     if payload.is_published is not None:
         module.is_published = payload.is_published
     if payload.version is not None:

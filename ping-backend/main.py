@@ -39,6 +39,7 @@ app = FastAPI(title="PING API", version="2.0.0")
 def seed_apps():
     db = SessionLocal()
     try:
+        ensure_schema_updates()
         default_org_id = ensure_default_org(db)
         ensure_default_apps(db)
         ensure_default_subjects(db)
@@ -46,7 +47,6 @@ def seed_apps():
         ensure_default_email_templates(db)
         ensure_admin_user(db, default_org_id)
         ensure_teacher_user(db, default_org_id)
-        ensure_schema_updates()
         seed_wordgame_scores(db)
     finally:
         db.close()
@@ -137,27 +137,31 @@ def ensure_default_modules(db: Session):
     default_modules = [
         {
             "module_id": "newton1",
-            "title": "Newton Minigame 1.1",
-            "description": "Apply force and motion basics in Newton minigame 1.1.",
+            "title": "Newton's First Law",
+            "description": "Explore inertia and why objects keep moving unless a force changes them.",
             "build_path": "/games/newton1/Build/newton1",
+            "cover_image_url": "/images/newton1-cover.png",
         },
         {
             "module_id": "newton2",
-            "title": "Newton Minigame 2",
-            "description": "Explore acceleration and interaction effects in Newton minigame 2.",
+            "title": "Newton's Second Law",
+            "description": "Test how force, mass, and acceleration relate in interactive challenges.",
             "build_path": "/games/newton2/Build/newton2",
+            "cover_image_url": "/images/newton2-cover.png",
         },
         {
             "module_id": "newton3",
-            "title": "Newton Minigame 3",
-            "description": "Challenge understanding of forces with Newton minigame 3.",
+            "title": "Newton's Third Law",
+            "description": "Discover action-reaction pairs through hands-on force interactions.",
             "build_path": "/games/newton3/Build/newton3",
+            "cover_image_url": "/images/newton3-cover.png",
         },
         {
             "module_id": "race-game",
             "title": "Race Game",
             "description": "Race through physics-driven scenarios and complete objectives.",
             "build_path": "/games/racegame/Build/racegame",
+            "cover_image_url": "/images/racegame-cover.png",
         },
     ]
 
@@ -172,6 +176,7 @@ def ensure_default_modules(db: Session):
         module.subject = "physics"
         module.subject_id = subject_id
         module.build_path = item["build_path"]
+        module.cover_image_url = item.get("cover_image_url")
         module.is_published = True
         module.version = module.version or "1.0.0"
 
@@ -309,6 +314,12 @@ def ensure_schema_updates():
                     WHERE table_name = 'modules' AND column_name = 'subject_id'
                 ) THEN
                     ALTER TABLE modules ADD COLUMN subject_id INTEGER;
+                END IF;
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name = 'modules' AND column_name = 'cover_image_url'
+                ) THEN
+                    ALTER TABLE modules ADD COLUMN cover_image_url TEXT;
                 END IF;
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.tables

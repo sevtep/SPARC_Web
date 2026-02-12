@@ -320,6 +320,7 @@ class ModuleCreate(BaseModel):
     subject: str
     subject_id: Optional[int] = None
     build_path: Optional[str] = None
+    cover_image_url: Optional[str] = None
     is_published: bool = True
     version: Optional[str] = "1.0.0"
 
@@ -330,6 +331,7 @@ class ModuleUpdate(BaseModel):
     subject: Optional[str] = None
     subject_id: Optional[int] = None
     build_path: Optional[str] = None
+    cover_image_url: Optional[str] = None
     is_published: Optional[bool] = None
     version: Optional[str] = None
 
@@ -377,6 +379,7 @@ class ModuleResponse(BaseModel):
     subject: str
     subject_id: Optional[int] = None
     build_path: Optional[str]
+    cover_image_url: Optional[str] = None
     is_published: bool
     version: Optional[str]
     created_at: datetime
