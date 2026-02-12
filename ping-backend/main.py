@@ -6,7 +6,16 @@ from sqlalchemy.orm import Session
 import json
 
 from database import engine, get_db, SessionLocal
-from models import Base, User, UserRole, Organization, Module, EmailTemplate, ModuleWhitelist, Subject
+from models import (
+    Base,
+    User,
+    UserRole,
+    Organization,
+    Module,
+    EmailTemplate,
+    ModuleWhitelist,
+    Subject,
+)
 from routers import auth_router
 from routers import telemetry_router
 from routers import class_router
@@ -48,11 +57,7 @@ def ensure_default_org(db: Session) -> int:
     if existing:
         return existing.id
 
-    default_org = Organization(
-        name="Default Organization",
-        domain=None,
-        is_active=True
-    )
+    default_org = Organization(name="Default Organization", domain=None, is_active=True)
     db.add(default_org)
     db.commit()
     db.refresh(default_org)
@@ -70,7 +75,7 @@ def ensure_admin_user(db: Session, organization_id: int):
             role=UserRole.PLATFORM_ADMIN,
             is_active=True,
             is_verified=True,
-            organization_id=organization_id
+            organization_id=organization_id,
         )
         db.add(admin_user)
     else:
@@ -95,7 +100,7 @@ def ensure_teacher_user(db: Session, organization_id: int):
             role=UserRole.TEACHER,
             is_active=True,
             is_verified=True,
-            organization_id=organization_id
+            organization_id=organization_id,
         )
         db.add(teacher_user)
     else:
@@ -115,7 +120,7 @@ def ensure_default_subjects(db: Session):
         ("math", "Math", 10),
         ("chemistry", "Chemistry", 20),
         ("biology", "Biology", 30),
-        ("earth-science", "Earth & Space", 40)
+        ("earth-science", "Earth & Space", 40),
     ]
     for key, name, order in subjects:
         existing = db.query(Subject).filter(Subject.key == key).first()
@@ -126,51 +131,86 @@ def ensure_default_subjects(db: Session):
 
 
 def ensure_default_modules(db: Session):
-    existing = db.query(Module).filter(Module.module_id == "forces-motion-basics").first()
-    if existing:
-        if not existing.build_path:
-            existing.build_path = "/games/Force&Motion/Build/20251122DrivingBuild"
-            existing.is_published = True
-        if not existing.subject_id:
-            subject = db.query(Subject).filter(Subject.key == existing.subject).first()
-            if subject:
-                existing.subject_id = subject.id
-        db.commit()
-        ensure_module_whitelist(db, existing, 1)
-        return
-
     subject = db.query(Subject).filter(Subject.key == "physics").first()
-    module = Module(
-        module_id="forces-motion-basics",
-        title="Forces and Motion: Basics",
-        description="Learn forces, motion, and driving dynamics.",
-        subject="physics",
-        subject_id=subject.id if subject else None,
-        build_path="/games/Force&Motion/Build/20251122DrivingBuild",
-        is_published=True,
-        version="1.0.0"
+    subject_id = subject.id if subject else None
+
+    default_modules = [
+        {
+            "module_id": "newton1",
+            "title": "Newton Minigame 1.1",
+            "description": "Apply force and motion basics in Newton minigame 1.1.",
+            "build_path": "/games/newton1/Build/newton1",
+        },
+        {
+            "module_id": "newton2",
+            "title": "Newton Minigame 2",
+            "description": "Explore acceleration and interaction effects in Newton minigame 2.",
+            "build_path": "/games/newton2/Build/newton2",
+        },
+        {
+            "module_id": "newton3",
+            "title": "Newton Minigame 3",
+            "description": "Challenge understanding of forces with Newton minigame 3.",
+            "build_path": "/games/newton3/Build/newton3",
+        },
+        {
+            "module_id": "race-game",
+            "title": "Race Game",
+            "description": "Race through physics-driven scenarios and complete objectives.",
+            "build_path": "/games/racegame/Build/racegame",
+        },
+    ]
+
+    for item in default_modules:
+        module = db.query(Module).filter(Module.module_id == item["module_id"]).first()
+        if not module:
+            module = Module(module_id=item["module_id"])
+            db.add(module)
+
+        module.title = item["title"]
+        module.description = item["description"]
+        module.subject = "physics"
+        module.subject_id = subject_id
+        module.build_path = item["build_path"]
+        module.is_published = True
+        module.version = module.version or "1.0.0"
+
+    legacy_module = (
+        db.query(Module).filter(Module.module_id == "forces-motion-basics").first()
     )
-    db.add(module)
+    if legacy_module:
+        legacy_module.is_published = False
+
     db.commit()
-    db.refresh(module)
-    ensure_module_whitelist(db, module, 1)
+
+    published_modules = (
+        db.query(Module)
+        .filter(Module.module_id.in_([item["module_id"] for item in default_modules]))
+        .all()
+    )
+    for module in published_modules:
+        ensure_module_whitelist(db, module, 1)
 
 
 def ensure_module_whitelist(db: Session, module: Module, organization_id: int):
-    existing = db.query(ModuleWhitelist).filter(
-        ModuleWhitelist.organization_id == organization_id,
-        ModuleWhitelist.module_id == module.id
-    ).first()
+    existing = (
+        db.query(ModuleWhitelist)
+        .filter(
+            ModuleWhitelist.organization_id == organization_id,
+            ModuleWhitelist.module_id == module.id,
+        )
+        .first()
+    )
     if existing:
         if not existing.is_enabled:
             existing.is_enabled = True
             db.commit()
         return
-    db.add(ModuleWhitelist(
-        organization_id=organization_id,
-        module_id=module.id,
-        is_enabled=True
-    ))
+    db.add(
+        ModuleWhitelist(
+            organization_id=organization_id, module_id=module.id, is_enabled=True
+        )
+    )
     db.commit()
 
 
@@ -179,42 +219,45 @@ def ensure_default_email_templates(db: Session):
         "invite_teacher": {
             "name": "Teacher Invite",
             "subject": "Your teacher invite code",
-            "body": "You have been invited to PING.\nInvite code: {{invite_code}}\nRole: Teacher\nExpires: {{expires_at}}\n"
+            "body": "You have been invited to PING.\nInvite code: {{invite_code}}\nRole: Teacher\nExpires: {{expires_at}}\n",
         },
         "invite_student": {
             "name": "Student Invite",
             "subject": "Your student invite code",
-            "body": "You have been invited to PING.\nInvite code: {{invite_code}}\nRole: Student\nExpires: {{expires_at}}\n"
+            "body": "You have been invited to PING.\nInvite code: {{invite_code}}\nRole: Student\nExpires: {{expires_at}}\n",
         },
         "welcome_user": {
             "name": "Welcome",
             "subject": "Welcome to PING",
-            "body": "Hello {{user_name}},\nWelcome to PING. Your account is ready."
+            "body": "Hello {{user_name}},\nWelcome to PING. Your account is ready.",
         },
         "password_reset": {
             "name": "Password Reset",
             "subject": "Your PING password has been reset",
-            "body": "Hello {{user_name}},\nYour new password is: {{new_password}}\nPlease log in and change it."
-        }
+            "body": "Hello {{user_name}},\nYour new password is: {{new_password}}\nPlease log in and change it.",
+        },
     }
 
     for key, data in templates.items():
         existing = db.query(EmailTemplate).filter(EmailTemplate.key == key).first()
         if existing:
             continue
-        db.add(EmailTemplate(
-            key=key,
-            name=data["name"],
-            subject=data["subject"],
-            body=data["body"],
-            is_active=True
-        ))
+        db.add(
+            EmailTemplate(
+                key=key,
+                name=data["name"],
+                subject=data["subject"],
+                body=data["body"],
+                is_active=True,
+            )
+        )
     db.commit()
 
 
 def ensure_schema_updates():
     with engine.connect() as conn:
-        conn.execute(text("""
+        conn.execute(
+            text("""
             DO $$
             BEGIN
                 IF NOT EXISTS (
@@ -268,8 +311,10 @@ def ensure_schema_updates():
                     ALTER TABLE modules ADD COLUMN subject_id INTEGER;
                 END IF;
             END $$;
-        """))
+        """)
+        )
         conn.commit()
+
 
 # CORS middleware
 app.add_middleware(
@@ -278,7 +323,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001",
         "https://ping.agaii.org",
-        "https://game.agaii.org"
+        "https://game.agaii.org",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -296,10 +341,13 @@ app.include_router(dashboard_router.router)
 app.include_router(sparc_router.router)
 app.include_router(admin_router.router)
 
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to PING API"}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
