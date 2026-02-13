@@ -164,10 +164,17 @@ def ensure_default_modules(db: Session):
             "cover_image_url": "/images/racegame-cover.png",
         },
         {
-            "module_id": "geotech-game",
-            "title": "GeoTech Field Lab",
-            "description": "Complete integrated geotechnical field tasks across map, lab, and analysis scenes.",
-            "build_path": "/games/geotech/Build/geotech",
+            "module_id": "geotech-lab1",
+            "title": "GeoTech Lab 1",
+            "description": "Complete GeoTech laboratory experiment set 1.",
+            "build_path": "/games/geotech-lab1/Build/geotech-lab1",
+            "cover_image_url": "/images/geotech-cover.png",
+        },
+        {
+            "module_id": "geotech-lab2",
+            "title": "GeoTech Lab 2",
+            "description": "Complete GeoTech laboratory experiment set 2.",
+            "build_path": "/games/geotech-lab2/Build/geotech-lab2",
             "cover_image_url": "/images/geotech-cover.png",
         },
     ]
@@ -192,6 +199,10 @@ def ensure_default_modules(db: Session):
     )
     if legacy_module:
         legacy_module.is_published = False
+
+    geotech_main = db.query(Module).filter(Module.module_id == "geotech-game").first()
+    if geotech_main:
+        geotech_main.is_published = False
 
     db.commit()
 
